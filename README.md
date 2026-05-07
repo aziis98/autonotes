@@ -12,6 +12,24 @@ For best performance in OCR, math transcription and spatial mapping, I recommend
 
 For detailed instructions on the transcription protocol, agents **must** refer to [AGENTS.md](./AGENTS.md).
 
+## Getting Started
+
+1. **Install Go**: Ensure you have [Go (Golang)](https://go.dev/) installed on your system.
+2. **Initialize**: Run the following command to download dependencies and ensure everything is built:
+   ```bash
+   go run -v . --help
+   ```
+3. **Create a Collection**: Create a new directory under `src/` for your notes and an `images/` folder inside it:
+   ```bash
+   mkdir -p src/my-course/images
+   ```
+4. **Add Images**: Place your handwritten note images (JPEG/PNG) into the `src/my-course/images/` directory.
+5. **Start Transcription**: Once images are in place, you can use the [process-new-images.md](.agents/workflows/process-new-images.md) workflow in a coding agent like Antigravity to kick-start the conversion process.
+
+## Flashcards
+
+The project integrates with [Hashcards](https://borretti.me/article/hashcards-plain-text-spaced-repetition), a plain-text spaced repetition system. Transcription agents can automatically generate flashcards in the `cards/` directory based on the theorems and definitions extracted from the notes.
+
 ## Folder Structure
 
 - `src/`: Contains the source materials.
