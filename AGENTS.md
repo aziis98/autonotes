@@ -8,10 +8,11 @@ Never use the browser subagent tool. Never use the browser subagent tool.
 
 ## Available Tools
 
-We use a CLI in `converter.go` built with Cobra (`./converter` once built):
+We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
-- `go run -v . status`: Lists all images inside `src/*/images/` directories that have not been assigned or mapped to any `.note` file.
-- `go run -v . serve`: Starts a local server with live-reload. This command automatically recompiles the project whenever a `.note` or template file is saved. **Assume this is always running in the background.**
+- `go run . status`: Lists all images inside `src/*/images/` directories that have not been assigned or mapped to any `.note` file.
+- `go run . serve`: Starts a local server with live-reload. This command automatically recompiles the project whenever a `.note` or template file is saved.
+- `go run . query`: Allows searching and filtering through the transcribed notes.
 
 ## Task Workflow
 

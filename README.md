@@ -15,16 +15,42 @@ For detailed instructions on the transcription protocol, agents **must** refer t
     - `images/`: The original handwritten photos (JPEG).
     - `[filename].note`: The structured transcription files.
 - `out/`: The generated standalone website.
-- `main.go`, `build.go`, `status.go`, `sync.go`, `parser.go`: The core CLI and logic.
+- `main.go`, `build.go`, `status.go`, `sync.go`, `parser.go`, `query.go`, `serve.go`, `check.go`: The core CLI and logic.
 - `AGENTS.md`: Detailed workflow and instructions for transcription agents.
+
+## CLI Commands
+
+The `converter` tool provides several subcommands for managing the transcription workflow.
+
+### Global Flags
+
+- `-d, --debug`: Enable debug mode for more verbose output.
+
+### Subcommands
+
+- `go run . status`: Lists images that have not been transcribed yet.
+- `go run . build`: Generates the HTML website in the `out/` directory.
+- `go run . sync`: Runs `status` followed by `build`.
+- `go run . serve`: Starts a local server with live-reload for previewing changes.
+  - `-p, --port <port>`: Port to serve on (default `8080`).
+  - `-H, --host <host>`: Host to serve on (default `localhost`).
+  - `--reload-static`: Also watch the `tpl/` folder for changes.
+- `go run . check`: Validates all `.note` files in `src/` for syntax errors.
+- `go run . query [path]`: Search and filter content across all notes or a specific path.
+  - `-s, --select <types>`: Filter by block types (e.g., `theorem,definition`).
+  - `-g, --grep <pattern>`: Search for text within blocks.
+  - `-e, --extract <types>`: Extract specific child blocks (e.g., `reword`).
+  - `query summary <path>`: Extract the lesson summary from a specific file.
 
 ## Usage
 
-Run the sync command to build and check for new work:
+Typically, you will want to keep the server running in one terminal:
 
 ```bash
-go run -v . sync
+go run . serve
 ```
+
+And then use other commands like `status` or `query` in another terminal to find work or search through existing notes.
 
 ## Syntax Overview (.note files)
 
