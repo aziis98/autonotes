@@ -30,6 +30,18 @@ For detailed instructions on the transcription protocol, agents **must** refer t
 4. **Add Images**: Place your handwritten note images (JPEG/PNG) into the `src/my-course/images/` directory.
 5. **Start Transcription**: Once images are in place, you can use the [process-new-images.md](.agents/workflows/process-new-images.md) workflow in a coding agent like Antigravity to kick-start the conversion process.
 
+## How It Works
+
+The core philosophy of AutoNotes is a **human-in-the-loop** (or rather, **agent-in-the-loop**) transcription workflow:
+
+1. **Source Tracking**: The `go run . status` command scans your `src/` directory. It parses all existing `.note` files to extract the names of images already mapped. By comparing this list with the files in your `images/` folders, it identifies exactly which pages still need to be transcribed (to immediately tell the agent what he has to do).
+
+2. **Spatial Mapping**: Using the 1000x1000 coordinate system, agents define `<box>` elements that link specific regions of an image to their literal transcription. This provides the "ground truth" and enables the interactive lens-crop view in the final HTML.
+
+3. **Formalization (Reword)**: Literal transcriptions are often messy. The `<reword>` tag is used to provide a professional, LaTeX-formatted version of the content. These blocks are linked back to the source `<box>` elements, allowing users to hover over a formal proof and see exactly where it came from in the original notes.
+
+4. **Fast Static Generation**: The go `build` and `serve` commands compile these structured notes into a standalone static website that features MathJax math rendering and can be hosted wherever you want.
+
 ## Flashcards
 
 The project integrates with [Hashcards](https://borretti.me/article/hashcards-plain-text-spaced-repetition), a plain-text spaced repetition system. Transcription agents can automatically generate flashcards in the `cards/` directory based on the theorems and definitions extracted from the notes.
