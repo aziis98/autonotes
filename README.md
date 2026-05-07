@@ -6,6 +6,10 @@ A Go-based tool for **agent-assisted transcription** of handwritten mathematical
 
 This project is explicitly designed to be operated by AI agents. Agents are responsible for viewing source images, extracting mathematical content, and mapping specific regions (using a 1000x1000 coordinate system) into `.note` files.
 
+### Recommended Environment
+
+For best performance in OCR, math transcription and spatial mapping, I recommend using Google's **Gemini 3 Flash** (or higher) models. I used these for free using **Antigravity**.
+
 For detailed instructions on the transcription protocol, agents **must** refer to [AGENTS.md](./AGENTS.md).
 
 ## Folder Structure
