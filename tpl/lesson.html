@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <!-- Use standard fonts for Neo-Brutalist look -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"],
+          ],
+          packages: { "[+]": ["ams", "amscd"] },
+        },
+        loader: { load: ["[tex]/ams", "[tex]/amscd"] },
+        startup: {
+          typeset: false,
+        },
+        options: {
+          enableMenu: false,
+        },
+      };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Recursive:wght@300..1000&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{.StaticPath}}styles.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      window.DEBUG = {{.Debug}};
+    </script>
+  </head>
+  <body>
+    <header class="main-header">
+      <nav class="breadcrumb-nav">
+        {{range $i, $crumb := .Breadcrumbs}} {{if $i}}<span class="separator"
+          >/</span
+        >{{end}} {{if $crumb.Link}}
+        <a href="{{$crumb.Link}}">{{$crumb.Name}}</a>
+        {{else}}
+        <span class="active-crumb">{{$crumb.Name}}</span>
+        {{end}} {{end}}
+      </nav>
+      <div class="header-actions">
+        <button
+          id="theme-toggle"
+          class="brutal-button icon"
+          title="Toggle Theme"
+        >
+          <i data-lucide="sun-moon" size="18"></i>
+        </button>
+        <button
+          id="toggle-transcription"
+          class="brutal-button icon"
+          title="Toggle OCR Transcription"
+        >
+          <i data-lucide="eye" size="18"></i>
+        </button>
+        <button
+          id="toggle-inspect"
+          class="brutal-button icon"
+          title="Inspect Region"
+        >
+          <i data-lucide="crosshair" size="18"></i>
+        </button>
+        <button id="toggle-preview" class="brutal-button preview-toggle">
+          Toggle Images
+        </button>
+      </div>
+    </header>
+
+    <main class="split-pane">
+      <!-- Left Column: Transcription -->
+      <article id="left-column">
+        <div class="content-wrapper">
+          <h1 class="lesson-title">{{.Title}}</h1>
+          {{if .Summary}}
+          <div class="lesson-summary-card">
+            {{.Summary}}
+          </div>
+          {{end}}
+          <div class="note-content">{{.Content}}</div>
+        </div>
+
+        <!-- Lens Crop View Wrapper (Neo-Brutalist Card) -->
+        <div id="lens-container">
+          <div id="lens-scaler">
+            <img id="lens-image" src="" />
+          </div>
+        </div>
+      </article>
+
+      <!-- Right Column: Original Image Viewer -->
+      <aside id="right-column">
+        <div id="image-container">
+          <img id="current-image" src="" />
+          <div id="highlight" class="highlight-box"></div>
+          <div id="inspector-overlay" class="inspector-overlay hidden">
+            <div id="inspector-selection" class="inspector-selection"></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="{{.StaticPath}}app.js"></script>
+  </body>
+</html>

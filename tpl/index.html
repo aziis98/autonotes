@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - AutoNotes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Recursive:wght@300..1000&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{.StaticPath}}styles.css" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"],
+          ],
+          packages: { "[+]": ["ams", "amscd"] },
+        },
+        loader: { load: ["[tex]/ams", "[tex]/amscd"] },
+        startup: {
+          typeset: false,
+        },
+        options: {
+          enableMenu: false,
+        },
+      };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="dashboard-body compact-mode">
+    <header class="compact-header">
+      <div class="header-left">
+        <h1 class="compact-title">AutoNotes</h1>
+        <nav class="compact-nav">
+          {{if .ParentPath}}
+          <a href="{{.ParentPath}}" class="nav-back"
+            ><i data-lucide="chevron-left" size="14"></i> Back</a
+          >
+          {{else}}
+          <span class="root-label">Root</span>
+          {{end}}
+        </nav>
+      </div>
+      <div class="header-right">
+        <button id="theme-toggle" class="compact-button" title="Toggle Theme">
+          <i data-lucide="sun-moon" size="16"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="compact-main">
+      <section class="entries-list">
+        {{range .Entries}}
+        <a
+          href="{{.Link}}"
+          class="entry-item {{if .IsDir}}is-dir{{else}}is-file{{end}}"
+        >
+          <div class="entry-icon">
+            {{if .IsDir}}
+            <i data-lucide="folder" size="18"></i>
+            {{else}}
+            <i data-lucide="file-text" size="18"></i>
+            {{end}}
+          </div>
+          <div class="entry-info">
+            <span class="entry-name">{{.Name}}{{if .IsDir}}/{{end}}</span>
+            {{if .IsDir}}<span class="entry-meta">Directory</span>{{end}} {{if
+            .Summary}}
+            <div class="entry-summary">{{.Summary}}</div>
+            {{end}}
+          </div>
+          <div class="entry-counter" data-path="{{.Link}}">
+            <button class="counter-btn dec" title="Decrement">
+              <i data-lucide="minus" size="14"></i>
+            </button>
+            <span class="counter-value">0</span>
+            <button class="counter-btn inc" title="Increment">
+              <i data-lucide="plus" size="14"></i>
+            </button>
+          </div>
+        </a>
+        {{end}}
+      </section>
+    </main>
+
+    <footer class="compact-footer">AutoNotes • {{len .Entries}} items</footer>
+
+    <script type="module" src="{{.StaticPath}}app.js"></script>
+  </body>
+</html>
