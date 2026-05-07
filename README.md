@@ -1,5 +1,9 @@
 # AutoNotes Project
 
+<p align="center">
+  <img src="docs/screenshot-1.png" alt="AutoNotes Screenshot" width="800">
+</p>
+
 A Go-based tool for **agent-assisted transcription** of handwritten mathematical notes into a structured digital format, generating a professional, interactive HTML visualization.
 
 ## Agent-Assisted Transcription
