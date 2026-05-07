@@ -4,7 +4,13 @@
   <img src="docs/screenshot-1.png" alt="AutoNotes Screenshot" width="800">
 </p>
 
-A Go-based tool for **agent-assisted transcription** of handwritten mathematical notes into a structured digital format, generating a professional, interactive HTML visualization.
+AutoNotes is a prototype of a **math handwritten notes OCR system** based purely on AI using multimodal models.
+
+This project explores a workflow for automatically transcribing complex mathematical notes while maintaining strict verification. When studying new material, blindly trusting AI transcriptions is risky as it's hard to distinguish between correct content and hallucinations. AutoNotes addresses this by leveraging the spatial reasoning of models like _Gemini 3 Flash_ (which are pretty good at retrieving `box_2d` coordinates) to create a "ground truth" **mapping between the digital transcription and the original handwriting**.
+
+The result is an HTML visualization where everything is first transcribed as is and then _reworded_ by the LLM (keeping the thread of source boxes). Every theorem or definition is linked back to a specific region in the source image, ensuring you can always verify the output against your original notes.
+
+As models are also able to recognize math notation and figures in the image, we also get for free a tool that automatically inserts them in the transcribed text.
 
 ## Agent-Assisted Transcription
 
@@ -117,14 +123,17 @@ Note files use an XML-like syntax to map transcriptions to images using a **1000
   - **Symbol Definitions**:
     - Use `<symbol id="..." name="..." description="..." latex="..." />` to define global identifiers.
     - Definitions can be centralized in a `symbols.note` or declared at the start of a chapter.
+
   - **Enhanced Examples**:
     - **Constants**: `<math><ref id="const-e">e</ref>^{i\pi} + 1 = 0</math>` links to the definition of the Euler's number.
-    - **Formal Terms**: `Il <ref id="def-omeomorfismo">omeomorfismo</ref> tra i due spazi...` links to the topological definition.
+    - **Formal Terms**: `L'<ref id="def-omeomorfismo">omeomorfismo</ref> tra i due spazi...` links to the topological definition.
     - **Theorems**: `Per il <ref id="theorem-cauchy">Teorema di Cauchy</ref>...` links to the statement and its proof.
+
   - **Interactive HTML Delivery**:
-    - **Contextual Tooltips**: Hovering over a reference displays a sleek floating card with the target's name, description, and LaTeX preview.
+    - **Contextual Tooltips**: Hovering over a reference displays a floating card with the target's name, description, and LaTeX preview.
     - **Back-references**: Each definition automatically tracks and lists all the places where it is referenced across the collection.
     - **Navigation**: Deep links that scroll to the exact block (theorem, definition) or highlight the specific occurrence.
+
   - **Agent Tooling**:
     - **Symbol Inspection**: A subcommand `go run . symbols` will provide a CLI interface for agents to list all defined symbols, verify their metadata, and trace their cross-reference graph (where they are used and what they link to).
 
