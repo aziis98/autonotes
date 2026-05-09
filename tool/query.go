@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ var (
 	extractFilter string
 )
 
-var queryCmd = &cobra.Command{
+var QueryCmd = &cobra.Command{
 	Use:   "query [path]",
 	Short: "Query information from the notes",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -179,9 +179,9 @@ var querySummaryCmd = &cobra.Command{
 }
 
 func init() {
-	queryCmd.Flags().StringVarP(&selectFilter, "select", "s", "all", "Filter blocks by type")
-	queryCmd.Flags().StringVarP(&grepFilter, "grep", "g", "", "Search text in blocks")
-	queryCmd.Flags().StringVarP(&extractFilter, "extract", "e", "", "Extract specific child blocks")
+	QueryCmd.Flags().StringVarP(&selectFilter, "select", "s", "all", "Filter blocks by type")
+	QueryCmd.Flags().StringVarP(&grepFilter, "grep", "g", "", "Search text in blocks")
+	QueryCmd.Flags().StringVarP(&extractFilter, "extract", "e", "", "Extract specific child blocks")
 
-	queryCmd.AddCommand(querySummaryCmd)
+	QueryCmd.AddCommand(querySummaryCmd)
 }

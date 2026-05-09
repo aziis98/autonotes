@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"fmt"
@@ -18,14 +18,14 @@ var reloadStatic bool
 var host string
 var port int
 
-var serveCmd = &cobra.Command{
+var ServeCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Serve the out/ folder and watch for changes",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Initial build
 		fmt.Println("Performing initial build...")
-		statusCmd.Run(cmd, args)
-		buildCmd.Run(cmd, args)
+		StatusCmd.Run(cmd, args)
+		BuildCmd.Run(cmd, args)
 
 		// Setup watcher
 		watcher, err := fsnotify.NewWatcher()
@@ -91,7 +91,7 @@ var serveCmd = &cobra.Command{
 					}
 					timer = time.AfterFunc(200*time.Millisecond, func() {
 						fmt.Printf("\n[%s] Change detected in %s. Rebuilding...\n", time.Now().Format("15:04:05"), event.Name)
-						buildCmd.Run(cmd, args)
+						BuildCmd.Run(cmd, args)
 						notifyClients()
 					})
 
@@ -190,9 +190,9 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	serveCmd.Flags().BoolVar(&reloadStatic, "reload-static", false, "Watch tpl/ folder as well")
-	serveCmd.Flags().StringVarP(&host, "host", "H", "localhost", "Host to serve on")
-	serveCmd.Flags().IntVarP(&port, "port", "p", 8080, "Port to serve on")
+	ServeCmd.Flags().BoolVar(&reloadStatic, "reload-static", false, "Watch tpl/ folder as well")
+	ServeCmd.Flags().StringVarP(&host, "host", "H", "localhost", "Host to serve on")
+	ServeCmd.Flags().IntVarP(&port, "port", "p", 8080, "Port to serve on")
 }
 
 func addRecursive(watcher *fsnotify.Watcher, path string) {

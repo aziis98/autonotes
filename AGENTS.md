@@ -10,13 +10,13 @@ Never use the browser subagent tool. Never use the browser subagent tool.
 
 We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
-- `go run . status`: Lists all images inside `src/*/images/` directories that have not been assigned or mapped to any `.note` file.
-- `go run . serve`: Starts a local server with live-reload. This command automatically recompiles the project whenever a `.note` or template file is saved.
-- `go run . query`: Allows searching and filtering through the transcribed notes.
+- `go run ./tool/cmd/autonotes status`: Lists all images inside `src/*/images/` directories that have not been assigned or mapped to any `.note` file.
+- `go run ./tool/cmd/autonotes serve`: Starts a local server with live-reload. This command automatically recompiles the project whenever a `.note` or template file is saved.
+- `go run ./tool/cmd/autonotes query`: Allows searching and filtering through the transcribed notes.
 
 ## Task Workflow
 
-1. **Find Work**: Run the command `go run -v . status`. This gives you paths to images that have not been transcribed yet (e.g. `src/ist-geom/images/photo1.jpg`). You MUST run this command periodically to ensure no images are missed!
+1. **Find Work**: Run the command `go run ./tool/cmd/autonotes status`. This gives you paths to images that have not been transcribed yet (e.g. `src/ist-geom/images/photo1.jpg`). You MUST run this command periodically to ensure no images are missed!
 
 2. **Automatic Rebuild**: You do NOT need to manually run `build` or `sync`. Since the `serve` command is running in the background, saving any `.note` file will automatically trigger a rebuild and refresh the preview via Live Reload.
 

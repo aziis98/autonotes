@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-var buildCmd = &cobra.Command{
+var BuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Compile .note files to HTML",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -293,7 +293,7 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 		StaticPath:    staticPath,
 		DashboardPath: dashboardPath,
 		Breadcrumbs:   breadcrumbs,
-		Debug:         debugMode,
+		Debug:         DebugMode,
 		Summary:       summary,
 	})
 	if err != nil {
@@ -333,7 +333,7 @@ func expandCompactRefs(input string) string {
 		expanded = append(expanded, expand(part)...)
 	}
 	result := strings.Join(expanded, " ")
-	if input != "" && debugMode {
+	if input != "" && DebugMode {
 		fmt.Printf("DEBUG: Expanding ref '%s' -> '%s'\n", input, result)
 	}
 	return result

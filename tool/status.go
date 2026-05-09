@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var statusCmd = &cobra.Command{
+var StatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "List unprocessed images",
 	Run: func(cmd *cobra.Command, args []string) {

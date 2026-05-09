@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"fmt"
@@ -6,14 +6,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var syncCmd = &cobra.Command{
+var SyncCmd = &cobra.Command{
 	Use:   "sync",
 	Short: "Run status and then build",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("--- Running Status ---")
-		statusCmd.Run(cmd, args)
+		StatusCmd.Run(cmd, args)
 		fmt.Println("\n--- Running Build ---")
-		buildCmd.Run(cmd, args)
+		BuildCmd.Run(cmd, args)
 		fmt.Println("\nSync completed successfully!")
 	},
 }

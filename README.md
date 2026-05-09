@@ -27,7 +27,7 @@ For detailed instructions on the transcription protocol, agents **must** refer t
 1. **Install Go**: Ensure you have [Go (Golang)](https://go.dev/) installed on your system.
 2. **Initialize**: Run the following command to download dependencies and ensure everything is built:
    ```bash
-   go run -v . --help
+   go run ./tool/cmd/autonotes --help
    ```
 3. **Create a Collection**: Create a new directory under `src/` for your notes and an `images/` folder inside it:
    ```bash
@@ -40,7 +40,7 @@ For detailed instructions on the transcription protocol, agents **must** refer t
 
 The core philosophy of AutoNotes is a **human-in-the-loop** (or rather, **agent-in-the-loop**) transcription workflow:
 
-1. **Source Tracking**: The `go run . status` command scans your `src/` directory. It parses all existing `.note` files to extract the names of images already mapped. By comparing this list with the files in your `images/` folders, it identifies exactly which pages still need to be transcribed (to immediately tell the agent what he has to do).
+1. **Source Tracking**: The `go run ./tool/cmd/autonotes status` command scans your `src/` directory. It parses all existing `.note` files to extract the names of images already mapped. By comparing this list with the files in your `images/` folders, it identifies exactly which pages still need to be transcribed (to immediately tell the agent what he has to do).
 
 2. **Spatial Mapping**: Using the 1000x1000 coordinate system, agents define `<box>` elements that link specific regions of an image to their literal transcription. This provides the "ground truth" and enables the interactive lens-crop view in the final HTML.
 
@@ -59,7 +59,8 @@ The project integrates with [Hashcards](https://borretti.me/article/hashcards-pl
     - `images/`: The original handwritten photos (JPEG).
     - `[filename].note`: The structured transcription files.
 - `out/`: The generated standalone website.
-- `main.go`, `build.go`, `status.go`, `sync.go`, `parser.go`, `query.go`, `serve.go`, `check.go`: The core CLI and logic.
+- `tool/`: Core logic and CLI implementation.
+  - `cmd/autonotes/`: CLI entry point.
 - `AGENTS.md`: Detailed workflow and instructions for transcription agents.
 
 ## CLI Commands
@@ -72,15 +73,15 @@ The `converter` tool provides several subcommands for managing the transcription
 
 ### Subcommands
 
-- `go run . status`: Lists images that have not been transcribed yet.
-- `go run . build`: Generates the HTML website in the `out/` directory.
-- `go run . sync`: Runs `status` followed by `build`.
-- `go run . serve`: Starts a local server with live-reload for previewing changes.
+- `go run ./tool/cmd/autonotes status`: Lists images that have not been transcribed yet.
+- `go run ./tool/cmd/autonotes build`: Generates the HTML website in the `out/` directory.
+- `go run ./tool/cmd/autonotes sync`: Runs `status` followed by `build`.
+- `go run ./tool/cmd/autonotes serve`: Starts a local server with live-reload for previewing changes.
   - `-p, --port <port>`: Port to serve on (default `8080`).
   - `-H, --host <host>`: Host to serve on (default `localhost`).
   - `--reload-static`: Also watch the `tpl/` folder for changes.
-- `go run . check`: Validates all `.note` files in `src/` for syntax errors.
-- `go run . query [path]`: Search and filter content across all notes or a specific path.
+- `go run ./tool/cmd/autonotes check`: Validates all `.note` files in `src/` for syntax errors.
+- `go run ./tool/cmd/autonotes query [path]`: Search and filter content across all notes or a specific path.
   - `-s, --select <types>`: Filter by block types (e.g., `theorem,definition`).
   - `-g, --grep <pattern>`: Search for text within blocks.
   - `-e, --extract <types>`: Extract specific child blocks (e.g., `reword`).
@@ -91,7 +92,7 @@ The `converter` tool provides several subcommands for managing the transcription
 Typically, you will want to keep the server running in one terminal:
 
 ```bash
-go run . serve
+go run ./tool/cmd/autonotes serve
 ```
 
 And then use other commands like `status` or `query` in another terminal to find work or search through existing notes.
@@ -116,7 +117,7 @@ Note files use an XML-like syntax to map transcriptions to images using a **1000
 
 - [ ] Convert the syntax to real XML, not XML-like
 
-- [ ] Refactor the `images/` folder concept to a `sources/` folder that can contain both images, zip of images, pdfs, etc. There is a command called `go run . extract` that unpacks archives and pdfs to a folder with a similar name that only contains image files. When generating the website, everything is flattened, given uuids, and pdfs are converted to images (with mutools).
+- [ ] Refactor the `images/` folder concept to a `sources/` folder that can contain both images, zip of images, pdfs, etc. There is a command called `go run ./tool/cmd/autonotes extract` that unpacks archives and pdfs to a folder with a similar name that only contains image files. When generating the website, everything is flattened, given uuids, and pdfs are converted to images (with mutools).
 
 - [ ] Add the concept of symbols, also embed in the math content, e.g. `<math><ref id="symbol-name">\alpha</ref></math>`. When converting to HTML, the refs get replaced with `\href` or more complicated `\htmlData` tags (katex feature).
   - **Global Cross-Referencing**: The `<ref id="...">...</ref>` tag is a universal linking mechanism that can wrap math symbols or plain text, creating an interconnected web of concepts.
@@ -135,7 +136,7 @@ Note files use an XML-like syntax to map transcriptions to images using a **1000
     - **Navigation**: Deep links that scroll to the exact block (theorem, definition) or highlight the specific occurrence.
 
   - **Agent Tooling**:
-    - **Symbol Inspection**: A subcommand `go run . symbols` will provide a CLI interface for agents to list all defined symbols, verify their metadata, and trace their cross-reference graph (where they are used and what they link to).
+    - **Symbol Inspection**: A subcommand `go run ./tool/cmd/autonotes symbols` will provide a CLI interface for agents to list all defined symbols, verify their metadata, and trace their cross-reference graph (where they are used and what they link to).
 
 - [ ] Add a search bar using FuseJS
 

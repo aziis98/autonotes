@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"errors"

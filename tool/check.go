@@ -1,4 +1,4 @@
-package main
+package autonotes
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var checkCmd = &cobra.Command{
+var CheckCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check .note files for syntax errors",
 	Run: func(cmd *cobra.Command, args []string) {
