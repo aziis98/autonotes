@@ -180,21 +180,6 @@ var BuildCmd = &cobra.Command{
 	},
 }
 
-type Breadcrumb struct {
-	Name string
-	Link string
-}
-
-type LessonData struct {
-	Title         string
-	Content       template.HTML
-	StaticPath    string
-	DashboardPath string
-	Breadcrumbs   []Breadcrumb
-	Debug         bool
-	Summary       template.HTML
-}
-
 func processNoteFile(notePath, outPath string) (template.HTML, error) {
 	content, err := os.ReadFile(notePath)
 	if err != nil {
@@ -218,27 +203,23 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 		absDir = "/" + filepath.ToSlash(filepath.Dir(relToOut)) + "/"
 	}
 
-	htmlContent := renderNode(ast, absDir, "", false)
+	renderer := &HTMLRenderer{absDir: absDir}
+	ast.Accept(renderer)
+	htmlContent := renderer.String()
 
 	// Check if <lesson> is present
-	var lessonNode *Node
-	for _, child := range ast.Children {
-		if child.Name == "lesson" {
-			lessonNode = child
-			break
-		}
-	}
+	root, _ := ast.(*BlockNode)
+	lessonNode := root.FindChild("lesson")
 	if lessonNode == nil {
 		return "", fmt.Errorf("missing <lesson> tag in %s", notePath)
 	}
 
 	// Extract summary if present
 	summary := template.HTML("")
-	for _, child := range lessonNode.Children {
-		if child.Name == "summary" {
-			summary = template.HTML(renderNode(child, absDir, "", false))
-			break
-		}
+	if b := lessonNode.FindChild("summary"); b != nil {
+		r := &HTMLRenderer{absDir: absDir}
+		b.Accept(r)
+		summary = template.HTML(r.String())
 	}
 
 	title := filepath.Base(notePath)
@@ -392,45 +373,52 @@ func expand(s string) []string {
 	return results
 }
 
-func renderNode(node *Node, absDir string, currentImgContext string, inMath bool) string {
-	if node == nil {
-		return ""
-	}
-	if node.Type == "text" {
-		if inMath {
-			return node.Content
-		}
-		return template.HTMLEscapeString(node.Content)
-	}
+type HTMLRenderer struct {
+	sb                strings.Builder
+	absDir            string
+	currentImgContext string
+	inMath            bool
+}
 
-	var sb strings.Builder
+func (r *HTMLRenderer) String() string {
+	return r.sb.String()
+}
 
+func (r *HTMLRenderer) VisitText(n *TextNode) {
+	if r.inMath {
+		r.sb.WriteString(n.Content)
+	} else {
+		r.sb.WriteString(template.HTMLEscapeString(n.Content))
+	}
+}
+
+func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 	// Image context tracking downward
-	if imgAttr, ok := node.Attributes["image"]; ok {
+	if imgAttr, ok := n.Attributes["image"]; ok {
 		imgName := imgAttr
 		if after, ok0 := strings.CutPrefix(imgName, "images/"); ok0 {
 			imgName = after
 		}
 		// Force .jpg extension for the output
 		imgName = strings.TrimSuffix(imgName, filepath.Ext(imgName)) + ".jpg"
-		currentImgContext = absDir + "images/" + imgName
+		r.currentImgContext = r.absDir + "images/" + imgName
 	}
 
-	isBox := node.Name == "box"
-	isMath := node.Name == "math"
-	isTheorem := node.Name == "theorem" || node.Name == "lemma" || node.Name == "definition" || node.Name == "proposition" || node.Name == "corollary" || node.Name == "exercise"
-	isImage := node.Name == "image"
-	isListElement := node.Name == "itemize" || node.Name == "enumerate" || node.Name == "item"
-	isInline := node.Name == "strong" || node.Name == "emph" || node.Name == "a"
+	isBox := n.Name == "box"
+	isMath := n.Name == "math"
+	isTheorem := n.Name == "theorem" || n.Name == "lemma" || n.Name == "definition" || n.Name == "proposition" || n.Name == "corollary" || n.Name == "exercise"
+	isImage := n.Name == "image"
+	isListElement := n.Name == "itemize" || n.Name == "enumerate" || n.Name == "item"
+	isInline := n.Name == "strong" || n.Name == "emph" || n.Name == "a"
 
 	if isImage {
-		srcAttr := node.Attributes["src"]
-		if srcAttr == "" && currentImgContext != "" {
-			srcAttr = currentImgContext
+		srcAttr := n.Attributes["src"]
+		if srcAttr == "" && r.currentImgContext != "" {
+			srcAttr = r.currentImgContext
 		} else if strings.HasPrefix(srcAttr, "images/") {
-			srcAttr = absDir + srcAttr
+			srcAttr = r.absDir + srcAttr
 		} else if srcAttr != "" {
-			srcAttr = absDir + "images/" + srcAttr
+			srcAttr = r.absDir + "images/" + srcAttr
 		}
 		
 		// Force .jpg extension for the output
@@ -438,29 +426,29 @@ func renderNode(node *Node, absDir string, currentImgContext string, inMath bool
 			srcAttr = strings.TrimSuffix(srcAttr, filepath.Ext(srcAttr)) + ".jpg"
 		}
 
-		sb.WriteString(fmt.Sprintf(`<div class="inline-image-crop" data-src="%s" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s"></div>`,
+		r.sb.WriteString(fmt.Sprintf(`<div class="inline-image-crop" data-src="%s" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s"></div>`,
 			template.HTMLEscapeString(srcAttr),
 			template.HTMLEscapeString(srcAttr),
-			template.HTMLEscapeString(node.Attributes["top"]),
-			template.HTMLEscapeString(node.Attributes["right"]),
-			template.HTMLEscapeString(node.Attributes["bottom"]),
-			template.HTMLEscapeString(node.Attributes["left"]),
+			template.HTMLEscapeString(n.Attr("top")),
+			template.HTMLEscapeString(n.Attr("right")),
+			template.HTMLEscapeString(n.Attr("bottom")),
+			template.HTMLEscapeString(n.Attr("left")),
 		))
 	} else if isBox {
-		uid := node.Attributes["uid"]
-		top := node.Attributes["top"]
-		right := node.Attributes["right"]
-		bottom := node.Attributes["bottom"]
-		left := node.Attributes["left"]
+		uid := n.Attr("uid")
+		top := n.Attr("top")
+		right := n.Attr("right")
+		bottom := n.Attr("bottom")
+		left := n.Attr("left")
 
 		idAttr := ""
 		if uid != "" {
 			idAttr = fmt.Sprintf(` id="%s"`, template.HTMLEscapeString(uid))
 		}
 
-		sb.WriteString(fmt.Sprintf(`<div%s class="box-text" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s">`,
+		r.sb.WriteString(fmt.Sprintf(`<div%s class="box-text" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s">`,
 			idAttr,
-			template.HTMLEscapeString(currentImgContext),
+			template.HTMLEscapeString(r.currentImgContext),
 			template.HTMLEscapeString(top),
 			template.HTMLEscapeString(right),
 			template.HTMLEscapeString(bottom),
@@ -468,96 +456,96 @@ func renderNode(node *Node, absDir string, currentImgContext string, inMath bool
 		))
 	} else if isMath {
 		displayAttr := "false"
-		if val, ok := node.Attributes["display"]; ok && val == "true" {
+		if val, ok := n.Attributes["display"]; ok && val == "true" {
 			displayAttr = "true"
 		}
-		sb.WriteString(fmt.Sprintf(`<span class="math" data-display="%s">`, displayAttr))
+		r.sb.WriteString(fmt.Sprintf(`<span class="math" data-display="%s">`, displayAttr))
 
 		if displayAttr == "true" {
 			// Special handling for display math to trim indentation
-			var mathContent strings.Builder
-			for _, child := range node.Children {
-				mathContent.WriteString(renderNode(child, absDir, currentImgContext, true))
+			mathRenderer := &HTMLRenderer{absDir: r.absDir, currentImgContext: r.currentImgContext, inMath: true}
+			for _, child := range n.Children {
+				child.Accept(mathRenderer)
 			}
-			trimmed := trimCommonIndent(mathContent.String())
-			sb.WriteString(trimmed)
+			trimmed := trimCommonIndent(mathRenderer.String())
+			r.sb.WriteString(trimmed)
 
 			// Skip normal child rendering since we just did it
-			sb.WriteString(`</span>`)
-			return sb.String()
+			r.sb.WriteString(`</span>`)
+			return
 		}
-	} else if node.Name == "reword" {
-		ref := expandCompactRefs(node.Attributes["ref"])
+	} else if n.Name == "reword" {
+		ref := expandCompactRefs(n.Attributes["ref"])
 		refAttr := ""
 		if ref != "" {
 			refAttr = fmt.Sprintf(` data-ref="%s"`, template.HTMLEscapeString(ref))
 		}
-		sb.WriteString(fmt.Sprintf(`<div class="reword"%s>`, refAttr))
-	} else if node.Name == "summary" {
-		sb.WriteString(`<div class="summary-block hidden">`)
+		r.sb.WriteString(fmt.Sprintf(`<div class="reword"%s>`, refAttr))
+	} else if n.Name == "summary" {
+		r.sb.WriteString(`<div class="summary-block hidden">`)
 	} else if isTheorem {
-		sb.WriteString(fmt.Sprintf(`<div class="%s">`, node.Name))
-	} else if node.Name == "itemize" {
-		sb.WriteString(`<ul class="list-disc pl-8 my-2">`)
-	} else if node.Name == "enumerate" {
-		sb.WriteString(`<ol class="list-decimal pl-8 my-2">`)
-	} else if node.Name == "item" {
-		sb.WriteString(`<li>`)
-	} else if node.Name == "strong" {
-		sb.WriteString(`<strong>`)
-	} else if node.Name == "emph" {
-		sb.WriteString(`<em>`)
-	} else if node.Name == "a" {
+		r.sb.WriteString(fmt.Sprintf(`<div class="%s">`, n.Name))
+	} else if n.Name == "itemize" {
+		r.sb.WriteString(`<ul class="list-disc pl-8 my-2">`)
+	} else if n.Name == "enumerate" {
+		r.sb.WriteString(`<ol class="list-decimal pl-8 my-2">`)
+	} else if n.Name == "item" {
+		r.sb.WriteString(`<li>`)
+	} else if n.Name == "strong" {
+		r.sb.WriteString(`<strong>`)
+	} else if n.Name == "emph" {
+		r.sb.WriteString(`<em>`)
+	} else if n.Name == "a" {
 		hrefAttr := ""
-		if href, ok := node.Attributes["href"]; ok {
+		if href, ok := n.Attributes["href"]; ok {
 			hrefAttr = fmt.Sprintf(` href="%s"`, template.HTMLEscapeString(href))
 		}
-		sb.WriteString(fmt.Sprintf(`<a%s>`, hrefAttr))
-	} else if node.Name == "section" {
-		title := node.Attributes["title"]
+		r.sb.WriteString(fmt.Sprintf(`<a%s>`, hrefAttr))
+	} else if n.Name == "section" {
+		title := n.Attributes["title"]
 		if title != "" {
-			sb.WriteString(fmt.Sprintf(`<h2>%s</h2>`, template.HTMLEscapeString(title)))
+			r.sb.WriteString(fmt.Sprintf(`<h2>%s</h2>`, template.HTMLEscapeString(title)))
 		}
-		sb.WriteString(`<div class="section">`)
-	} else if node.Name == "root" {
+		r.sb.WriteString(`<div class="section">`)
+	} else if n.Name == "root" {
 		// Just render children
 	} else {
 		// Generic fallback
-		sb.WriteString(fmt.Sprintf(`<div class="%s">`, node.Name))
+		r.sb.WriteString(fmt.Sprintf(`<div class="%s">`, n.Name))
 	}
 
-	for _, child := range node.Children {
-		sb.WriteString(renderNode(child, absDir, currentImgContext, inMath || isMath))
+	oldInMath := r.inMath
+	if isMath {
+		r.inMath = true
 	}
-
-	if (isBox || isTheorem || (node.Name != "root" && node.Name != "section" && !isBox && !isMath && !isTheorem && !isImage && node.Name != "reword" && !isListElement && !isInline)) && node.Name != "math" {
-		sb.WriteString(`</div>`)
-	} else if node.Name == "section" {
-		sb.WriteString(`</div>`)
-	} else if node.Name == "math" {
-		sb.WriteString(`</span>`)
-	} else if node.Name == "reword" {
-		sb.WriteString(`</div>`)
-	} else if node.Name == "summary" {
-		// Summary tag itself is just a container, we don't render a wrapper div for it
-		// but we might want to hide it in the main lesson view if it's already in the dashboard
-		// Actually, let's wrap it in a hidden div so it doesn't show up twice
-		sb.WriteString(`</div>`)
-	} else if node.Name == "itemize" {
-		sb.WriteString(`</ul>`)
-	} else if node.Name == "enumerate" {
-		sb.WriteString(`</ol>`)
-	} else if node.Name == "item" {
-		sb.WriteString(`</li>`)
-	} else if node.Name == "strong" {
-		sb.WriteString(`</strong>`)
-	} else if node.Name == "emph" {
-		sb.WriteString(`</em>`)
-	} else if node.Name == "a" {
-		sb.WriteString(`</a>`)
+	for _, child := range n.Children {
+		child.Accept(r)
 	}
+	r.inMath = oldInMath
 
-	return sb.String()
+	if (isBox || isTheorem || (n.Name != "root" && n.Name != "section" && !isBox && !isMath && !isTheorem && !isImage && n.Name != "reword" && !isListElement && !isInline)) && n.Name != "math" {
+		r.sb.WriteString(`</div>`)
+	} else if n.Name == "section" {
+		r.sb.WriteString(`</div>`)
+	} else if n.Name == "math" {
+		r.sb.WriteString(`</span>`)
+	} else if n.Name == "reword" {
+		r.sb.WriteString(`</div>`)
+	} else if n.Name == "summary" {
+		r.sb.WriteString(`</div>`)
+	} else if n.Name == "itemize" {
+		r.sb.WriteString(`</ul>`)
+	} else if n.Name == "enumerate" {
+		r.sb.WriteString(`</ol>`)
+	} else if n.Name == "item" {
+		r.sb.WriteString(`</li>`)
+	} else if n.Name == "strong" {
+		r.sb.WriteString(`</strong>`)
+	} else if n.Name == "emph" {
+		r.sb.WriteString(`</em>`)
+	} else if n.Name == "a" {
+		r.sb.WriteString(`</a>`)
+	}
 }
 
 func trimCommonIndent(s string) string {

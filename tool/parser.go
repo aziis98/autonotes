@@ -6,25 +6,17 @@ import (
 	"unicode"
 )
 
-type Node struct {
-	Type       string // "element" or "text"
-	Name       string
-	Attributes map[string]string
-	Content    string
-	Children   []*Node
-}
-
-type Parser struct {
+type simpleParser struct {
 	input string
 	pos   int
 }
 
-func NewParser(input string) *Parser {
-	return &Parser{input: input, pos: 0}
+func NewParser(input string) Parser {
+	return &simpleParser{input: input, pos: 0}
 }
 
-func (p *Parser) Parse() (*Node, error) {
-	root := &Node{Type: "element", Name: "root", Attributes: make(map[string]string)}
+func (p *simpleParser) Parse() (Node, error) {
+	root := &BlockNode{Name: "root", Attributes: make(map[string]string)}
 	for p.pos < len(p.input) {
 		child, err := p.parseNode()
 		if err != nil {
@@ -37,7 +29,7 @@ func (p *Parser) Parse() (*Node, error) {
 	return root, nil
 }
 
-func (p *Parser) parseNode() (*Node, error) {
+func (p *simpleParser) parseNode() (Node, error) {
 	p.skipWhitespace()
 	if p.pos >= len(p.input) {
 		return nil, nil
@@ -53,7 +45,7 @@ func (p *Parser) parseNode() (*Node, error) {
 	return p.parseText()
 }
 
-func (p *Parser) isTagStart() bool {
+func (p *simpleParser) isTagStart() bool {
 	if p.pos >= len(p.input) || p.input[p.pos] != '<' {
 		return false
 	}
@@ -64,7 +56,7 @@ func (p *Parser) isTagStart() bool {
 	return unicode.IsLetter(next) || next == '/'
 }
 
-func (p *Parser) parseElement() (*Node, error) {
+func (p *simpleParser) parseElement() (*BlockNode, error) {
 	// Skip '<'
 	p.pos++
 
@@ -73,8 +65,7 @@ func (p *Parser) parseElement() (*Node, error) {
 		return nil, errors.New("empty tag name")
 	}
 
-	node := &Node{
-		Type:       "element",
+	node := &BlockNode{
 		Name:       name,
 		Attributes: make(map[string]string),
 	}
@@ -173,25 +164,24 @@ func (p *Parser) parseElement() (*Node, error) {
 	return node, nil
 }
 
-func (p *Parser) parseText() (*Node, error) {
+func (p *simpleParser) parseText() (*TextNode, error) {
 	start := p.pos
 	for p.pos < len(p.input) && !p.isTagStart() {
 		p.pos++
 	}
 	content := p.input[start:p.pos]
-	return &Node{
-		Type:    "text",
+	return &TextNode{
 		Content: content,
 	}, nil
 }
 
-func (p *Parser) skipWhitespace() {
+func (p *simpleParser) skipWhitespace() {
 	for p.pos < len(p.input) && unicode.IsSpace(rune(p.input[p.pos])) {
 		p.pos++
 	}
 }
 
-func (p *Parser) readUntilWhitespaceOr(chars ...byte) string {
+func (p *simpleParser) readUntilWhitespaceOr(chars ...byte) string {
 	start := p.pos
 	for p.pos < len(p.input) {
 		r := p.input[p.pos]

@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -14,16 +15,35 @@ var (
 	selectFilter  string
 	grepFilter    string
 	extractFilter string
+	histogramMode bool
+	verboseMode   bool
 )
 
 var QueryCmd = &cobra.Command{
 	Use:   "query [path]",
 	Short: "Query information from the notes",
+	Example: `  # Search for all theorems
+  autonotes query --select theorem
+
+  # Search for a specific term
+  autonotes query --grep "Frobenius"
+
+  # Extract only the reworded text for all definitions
+  autonotes query --select definition --extract reword
+
+  # Show counts for all found tag types
+  autonotes query --histogram
+
+  # Verbose output for debugging
+  autonotes query -v --grep "topologia"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var files []string
 		if len(args) > 0 {
 			files = append(files, args[0])
 		} else {
+			if verboseMode {
+				fmt.Fprintln(os.Stderr, "Globbing src/ for .note files...")
+			}
 			filepath.WalkDir("src", func(path string, d fs.DirEntry, err error) error {
 				if err == nil && !d.IsDir() && strings.HasSuffix(path, ".note") {
 					files = append(files, path)
@@ -31,6 +51,12 @@ var QueryCmd = &cobra.Command{
 				return nil
 			})
 		}
+
+		if verboseMode {
+			fmt.Fprintf(os.Stderr, "Found %d files.\n", len(files))
+		}
+
+		histogram := make(map[string]int)
 
 		var selectedTypes []string
 		if selectFilter != "" && selectFilter != "all" {
@@ -42,67 +68,77 @@ var QueryCmd = &cobra.Command{
 			extractTypes = strings.Split(extractFilter, ",")
 		}
 
+		foundAny := false
 		for _, file := range files {
 			content, err := os.ReadFile(file)
 			if err != nil {
 				continue
 			}
 
+			if verboseMode {
+				fmt.Fprintf(os.Stderr, "Parsing %s...\n", file)
+			}
 			p := NewParser(string(content))
 			ast, err := p.Parse()
 			if err != nil {
+				if verboseMode {
+					fmt.Fprintf(os.Stderr, "Error parsing %s: %v\n", file, err)
+				}
 				continue
 			}
 
 			// Find the lesson node
-			var lessonNode *Node
-			for _, child := range ast.Children {
-				if child.Name == "lesson" {
-					lessonNode = child
-					break
-				}
+			root, ok := ast.(*BlockNode)
+			if !ok {
+				continue
 			}
+
+			lessonNode := root.FindChild("lesson")
 
 			if lessonNode == nil {
 				continue
 			}
 
-			for _, block := range lessonNode.Children {
-				if block.Type != "element" || block.Name == "summary" {
+			for _, child := range lessonNode.Children {
+				block, ok := child.(*BlockNode)
+				if !ok || block.Name == "summary" {
 					continue
 				}
 
 				// Filter by type
 				if selectedTypes != nil {
-					found := false
-					for _, t := range selectedTypes {
-						if block.Name == t {
-							found = true
-							break
-						}
-					}
-					if !found {
+					if !slices.Contains(selectedTypes, block.Name) {
 						continue
 					}
 				}
 
 				// Filter by grep
 				if grepFilter != "" {
-					text := getAllText(block)
+					extractor := &TextExtractor{}
+					block.Accept(extractor)
+					text := extractor.String()
 					if !strings.Contains(strings.ToLower(text), strings.ToLower(grepFilter)) {
 						continue
 					}
 				}
 
+				if histogramMode {
+					histogram[block.Name]++
+					foundAny = true
+					continue
+				}
+
+				foundAny = true
 				// Extract and Print
 				fmt.Printf("[%s] %s\n", file, block.Name)
+				printer := NewPrinter(os.Stdout)
 				if extractTypes == nil {
-					printNode(block, 1)
+					printer.Print(block)
 				} else {
 					for _, child := range block.Children {
-						for _, eType := range extractTypes {
-							if child.Name == eType {
-								printNode(child, 1)
+						if b, ok := child.(*BlockNode); ok {
+							if slices.Contains(extractTypes, b.Name) {
+								printer.Print(b)
 							}
 						}
 					}
@@ -110,53 +146,37 @@ var QueryCmd = &cobra.Command{
 				fmt.Println()
 			}
 		}
+
+		if histogramMode {
+			fmt.Println("Tag Histogram:")
+			for tag, count := range histogram {
+				fmt.Printf("  %s: %d\n", tag, count)
+			}
+		}
+
+		if !foundAny {
+			os.Exit(1)
+		}
 	},
 }
 
-func getAllText(n *Node) string {
-	if n.Type == "text" {
-		return n.Content
-	}
-	var res strings.Builder
-	for _, child := range n.Children {
-		res.WriteString(getAllText(child))
-		res.WriteString(" ")
-	}
-	return res.String()
+type TextExtractor struct {
+	sb strings.Builder
 }
 
-func printNode(n *Node, indent int) {
-	if n.Type == "text" {
-		content := strings.TrimSpace(n.Content)
-		if content == "" {
-			return
-		}
-		lines := strings.Split(content, "\n")
-		for _, line := range lines {
-			fmt.Printf("%s%s\n", strings.Repeat("  ", indent), strings.TrimSpace(line))
-		}
-		return
-	}
+func (e *TextExtractor) VisitText(n *TextNode) {
+	e.sb.WriteString(n.Content)
+	e.sb.WriteString(" ")
+}
 
-	var attrs []string
-	for k, v := range n.Attributes {
-		attrs = append(attrs, fmt.Sprintf("%s=%q", k, v))
-	}
-	attrStr := ""
-	if len(attrs) > 0 {
-		attrStr = " " + strings.Join(attrs, " ")
-	}
-
-	if len(n.Children) == 0 {
-		fmt.Printf("%s<%s%s />\n", strings.Repeat("  ", indent), n.Name, attrStr)
-		return
-	}
-
-	fmt.Printf("%s<%s%s>\n", strings.Repeat("  ", indent), n.Name, attrStr)
+func (e *TextExtractor) VisitBlock(n *BlockNode) {
 	for _, child := range n.Children {
-		printNode(child, indent+1)
+		child.Accept(e)
 	}
-	fmt.Printf("%s</%s>\n", strings.Repeat("  ", indent), n.Name)
+}
+
+func (e *TextExtractor) String() string {
+	return e.sb.String()
 }
 
 var querySummaryCmd = &cobra.Command{
@@ -182,6 +202,8 @@ func init() {
 	QueryCmd.Flags().StringVarP(&selectFilter, "select", "s", "all", "Filter blocks by type")
 	QueryCmd.Flags().StringVarP(&grepFilter, "grep", "g", "", "Search text in blocks")
 	QueryCmd.Flags().StringVarP(&extractFilter, "extract", "e", "", "Extract specific child blocks")
+	QueryCmd.Flags().BoolVar(&histogramMode, "histogram", false, "Print counts for all found tag types")
+	QueryCmd.Flags().BoolVarP(&verboseMode, "verbose", "v", false, "Print globbing and parsing details to stderr")
 
 	QueryCmd.AddCommand(querySummaryCmd)
 }

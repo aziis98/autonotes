@@ -76,7 +76,8 @@ func getUnprocessedImages(srcDir string) ([]string, error) {
 			// Path is like: src/ist-geom/lesson-01.note
 			// collection dir is src/ist-geom
 			collectionDir := filepath.Dir(path)
-			findImagesInAST(ast, collectionDir, usedImages)
+			finder := &ImageFinder{collectionDir: collectionDir, used: usedImages}
+			ast.Accept(finder)
 		}
 		return nil
 	})
@@ -93,22 +94,29 @@ func getUnprocessedImages(srcDir string) ([]string, error) {
 	return unprocessed, nil
 }
 
-func findImagesInAST(node *Node, collectionDir string, used map[string]bool) {
-	if node == nil {
-		return
+type ImageFinder struct {
+	collectionDir string
+	used          map[string]bool
+}
+
+func (f *ImageFinder) VisitText(n *TextNode) {}
+
+func (f *ImageFinder) VisitBlock(n *BlockNode) {
+	if img := n.Attr("image"); img != "" {
+		imgName := strings.TrimPrefix(img, "images/")
+		fullPath := filepath.Join(f.collectionDir, "images", imgName)
+		f.used[fullPath] = true
 	}
-	if img, ok := node.Attributes["image"]; ok && img != "" {
-		// Image paths are specified as just "photo1.jpg" and imply "./images/photo1.jpg"
-		// The full path would be collectionDir + "/images/" + img
-		// Or maybe the user literally wrote "image=images/photo1.jpg"?
-		// "lesson-01.note can write image=photo1.jpg to point to ./images/photo1.jpg and the 'images/' part is always implied and can also be omitted"
-		imgName := img
-		imgName = strings.TrimPrefix(imgName, "images/")
-		fullPath := filepath.Join(collectionDir, "images", imgName)
-		used[fullPath] = true
+	// Also check "src" for "image" tag
+	if n.Name == "image" {
+		if src := n.Attr("src"); src != "" {
+			imgName := strings.TrimPrefix(src, "images/")
+			fullPath := filepath.Join(f.collectionDir, "images", imgName)
+			f.used[fullPath] = true
+		}
 	}
-	
-	for _, child := range node.Children {
-		findImagesInAST(child, collectionDir, used)
+
+	for _, child := range n.Children {
+		child.Accept(f)
 	}
 }
