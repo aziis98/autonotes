@@ -65,10 +65,10 @@ var BuildCmd = &cobra.Command{
 			} else {
 				ext := strings.ToLower(filepath.Ext(path))
 				isImage := ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext == ".webp"
-				
+
 				if isImage {
 					imageOutPath := strings.TrimSuffix(outPath, filepath.Ext(outPath)) + ".jpg"
-					
+
 					// Skip if out file is more recent than original image
 					srcInfo, err := d.Info()
 					if err == nil {
@@ -420,20 +420,20 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 		} else if srcAttr != "" {
 			srcAttr = r.absDir + "images/" + srcAttr
 		}
-		
+
 		// Force .jpg extension for the output
 		if strings.Contains(srcAttr, "images/") {
 			srcAttr = strings.TrimSuffix(srcAttr, filepath.Ext(srcAttr)) + ".jpg"
 		}
 
-		r.sb.WriteString(fmt.Sprintf(`<div class="inline-image-crop" data-src="%s" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s"></div>`,
+		fmt.Fprintf(&r.sb, `<div class="inline-image-crop" data-src="%s" data-img="%s" data-top="%s" data-right="%s" data-bottom="%s" data-left="%s"></div>`,
 			template.HTMLEscapeString(srcAttr),
 			template.HTMLEscapeString(srcAttr),
 			template.HTMLEscapeString(n.Attr("top")),
 			template.HTMLEscapeString(n.Attr("right")),
 			template.HTMLEscapeString(n.Attr("bottom")),
 			template.HTMLEscapeString(n.Attr("left")),
-		))
+		)
 	} else if isBox {
 		uid := n.Attr("uid")
 		top := n.Attr("top")
@@ -459,7 +459,7 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 		if val, ok := n.Attributes["display"]; ok && val == "true" {
 			displayAttr = "true"
 		}
-		r.sb.WriteString(fmt.Sprintf(`<span class="math" data-display="%s">`, displayAttr))
+		fmt.Fprintf(&r.sb, `<span class="math" data-display="%s">`, displayAttr)
 
 		if displayAttr == "true" {
 			// Special handling for display math to trim indentation
@@ -475,43 +475,43 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 			return
 		}
 	} else if n.Name == "reword" {
-		ref := expandCompactRefs(n.Attributes["ref"])
+		ref := expandCompactRefs(n.Attr("ref"))
 		refAttr := ""
 		if ref != "" {
 			refAttr = fmt.Sprintf(` data-ref="%s"`, template.HTMLEscapeString(ref))
 		}
-		r.sb.WriteString(fmt.Sprintf(`<div class="reword"%s>`, refAttr))
+		fmt.Fprintf(&r.sb, `<div class="reword"%s>`, refAttr)
 	} else if n.Name == "summary" {
-		r.sb.WriteString(`<div class="summary-block hidden">`)
+		fmt.Fprintf(&r.sb, `<div class="summary-block hidden">`)
 	} else if isTheorem {
-		r.sb.WriteString(fmt.Sprintf(`<div class="%s">`, n.Name))
+		fmt.Fprintf(&r.sb, `<div class="%s">`, n.Name)
 	} else if n.Name == "itemize" {
-		r.sb.WriteString(`<ul class="list-disc pl-8 my-2">`)
+		fmt.Fprintf(&r.sb, `<ul class="list-disc pl-8 my-2">`)
 	} else if n.Name == "enumerate" {
-		r.sb.WriteString(`<ol class="list-decimal pl-8 my-2">`)
+		fmt.Fprintf(&r.sb, `<ol class="list-decimal pl-8 my-2">`)
 	} else if n.Name == "item" {
-		r.sb.WriteString(`<li>`)
+		fmt.Fprintf(&r.sb, `<li>`)
 	} else if n.Name == "strong" {
-		r.sb.WriteString(`<strong>`)
+		fmt.Fprintf(&r.sb, `<strong>`)
 	} else if n.Name == "emph" {
-		r.sb.WriteString(`<em>`)
+		fmt.Fprintf(&r.sb, `<em>`)
 	} else if n.Name == "a" {
 		hrefAttr := ""
 		if href, ok := n.Attributes["href"]; ok {
 			hrefAttr = fmt.Sprintf(` href="%s"`, template.HTMLEscapeString(href))
 		}
-		r.sb.WriteString(fmt.Sprintf(`<a%s>`, hrefAttr))
+		fmt.Fprintf(&r.sb, `<a%s>`, hrefAttr)
 	} else if n.Name == "section" {
 		title := n.Attributes["title"]
 		if title != "" {
-			r.sb.WriteString(fmt.Sprintf(`<h2>%s</h2>`, template.HTMLEscapeString(title)))
+			fmt.Fprintf(&r.sb, `<h2>%s</h2>`, template.HTMLEscapeString(title))
 		}
-		r.sb.WriteString(`<div class="section">`)
+		fmt.Fprintf(&r.sb, `<div class="section">`)
 	} else if n.Name == "root" {
 		// Just render children
 	} else {
 		// Generic fallback
-		r.sb.WriteString(fmt.Sprintf(`<div class="%s">`, n.Name))
+		fmt.Fprintf(&r.sb, `<div class="%s">`, n.Name)
 	}
 
 	oldInMath := r.inMath
@@ -524,27 +524,27 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 	r.inMath = oldInMath
 
 	if (isBox || isTheorem || (n.Name != "root" && n.Name != "section" && !isBox && !isMath && !isTheorem && !isImage && n.Name != "reword" && !isListElement && !isInline)) && n.Name != "math" {
-		r.sb.WriteString(`</div>`)
+		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "section" {
-		r.sb.WriteString(`</div>`)
+		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "math" {
-		r.sb.WriteString(`</span>`)
+		fmt.Fprintf(&r.sb, `</span>`)
 	} else if n.Name == "reword" {
-		r.sb.WriteString(`</div>`)
+		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "summary" {
-		r.sb.WriteString(`</div>`)
+		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "itemize" {
-		r.sb.WriteString(`</ul>`)
+		fmt.Fprintf(&r.sb, `</ul>`)
 	} else if n.Name == "enumerate" {
-		r.sb.WriteString(`</ol>`)
+		fmt.Fprintf(&r.sb, `</ol>`)
 	} else if n.Name == "item" {
-		r.sb.WriteString(`</li>`)
+		fmt.Fprintf(&r.sb, `</li>`)
 	} else if n.Name == "strong" {
-		r.sb.WriteString(`</strong>`)
+		fmt.Fprintf(&r.sb, `</strong>`)
 	} else if n.Name == "emph" {
-		r.sb.WriteString(`</em>`)
+		fmt.Fprintf(&r.sb, `</em>`)
 	} else if n.Name == "a" {
-		r.sb.WriteString(`</a>`)
+		fmt.Fprintf(&r.sb, `</a>`)
 	}
 }
 
