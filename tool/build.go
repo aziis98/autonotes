@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/image/draw"
@@ -74,12 +73,14 @@ var BuildCmd = &cobra.Command{
 					if err == nil {
 						dstInfo, err := os.Stat(imageOutPath)
 						if err == nil && dstInfo.ModTime().After(srcInfo.ModTime()) {
+							if DebugMode {
+								fmt.Printf("Skipping %s (up to date)\n", path)
+							}
 							copiedCount++
 							return nil
 						}
 					}
 
-					fmt.Printf("Processing image %s...\n", path)
 					if err := processImage(path, imageOutPath); err != nil {
 						fmt.Printf("Error processing image %s: %v\n", path, err)
 						// Fallback to simple copy with original extension
@@ -91,6 +92,7 @@ var BuildCmd = &cobra.Command{
 				} else {
 					content, err := os.ReadFile(path)
 					if err == nil {
+						fmt.Printf("Copying %s to %s\n", path, outPath)
 						os.WriteFile(outPath, content, 0644)
 						copiedCount++
 					}
@@ -285,92 +287,12 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 }
 
 func expandCompactRefs(input string) string {
-	// Custom split that respects brackets
-	var parts []string
-	var current strings.Builder
-	depth := 0
-	for i := 0; i < len(input); i++ {
-		if input[i] == '[' {
-			depth++
-			current.WriteByte(input[i])
-		} else if input[i] == ']' {
-			depth--
-			current.WriteByte(input[i])
-		} else if unicode.IsSpace(rune(input[i])) && depth == 0 {
-			if current.Len() > 0 {
-				parts = append(parts, current.String())
-				current.Reset()
-			}
-		} else {
-			current.WriteByte(input[i])
-		}
-	}
-	if current.Len() > 0 {
-		parts = append(parts, current.String())
-	}
-
-	var expanded []string
-	for _, part := range parts {
-		expanded = append(expanded, expand(part)...)
-	}
+	expanded := ExpandRefs(input)
 	result := strings.Join(expanded, " ")
 	if input != "" && DebugMode {
 		fmt.Printf("DEBUG: Expanding ref '%s' -> '%s'\n", input, result)
 	}
 	return result
-}
-
-func expand(s string) []string {
-	start := strings.Index(s, "[")
-	if start == -1 {
-		return []string{s}
-	}
-
-	// Find matching ]
-	end := -1
-	depth := 0
-	for i := start; i < len(s); i++ {
-		if s[i] == '[' {
-			depth++
-		} else if s[i] == ']' {
-			depth--
-			if depth == 0 {
-				end = i
-				break
-			}
-		}
-	}
-
-	if end == -1 {
-		return []string{s} // Invalid syntax, return as is
-	}
-
-	prefix := s[:start]
-	suffix := s[end+1:]
-	content := s[start+1 : end]
-
-	// Split content by commas, but only at top level
-	var items []string
-	currStart := 0
-	currDepth := 0
-	for i := 0; i < len(content); i++ {
-		if content[i] == '[' {
-			currDepth++
-		} else if content[i] == ']' {
-			currDepth--
-		} else if content[i] == ',' && currDepth == 0 {
-			items = append(items, content[currStart:i])
-			currStart = i + 1
-		}
-	}
-	items = append(items, content[currStart:])
-
-	var results []string
-	for _, item := range items {
-		subExp := expand(prefix + strings.TrimSpace(item) + suffix)
-		results = append(results, subExp...)
-	}
-	return results
 }
 
 type HTMLRenderer struct {
@@ -601,7 +523,7 @@ func processImage(srcPath, dstPath string) error {
 	}
 	defer f.Close()
 
-	img, _, err := image.Decode(f)
+	img, format, err := image.Decode(f)
 	if err != nil {
 		return err
 	}
@@ -624,6 +546,9 @@ func processImage(srcPath, dstPath string) error {
 		newImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 		draw.BiLinear.Scale(newImg, newImg.Bounds(), img, img.Bounds(), draw.Over, nil)
 		img = newImg
+		fmt.Printf("Resizing %s from %dx%d (%s) to %dx%d (jpg)\n", srcPath, width, height, format, newWidth, newHeight)
+	} else {
+		fmt.Printf("Re-encoding %s from %s to jpg (%dx%d)\n", srcPath, format, width, height)
 	}
 
 	out, err := os.Create(dstPath)

@@ -43,7 +43,7 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
 12. **Inline Formatting**: Use `<strong>...</strong>` for bold text and `<emph>...</emph>` for emphasis (italics). Do not use markdown-style `**...**` or `*...*` expressions, as the renderer requires explicit tags for inline styling.
 
-13. **Lesson Summary**: Include an optional `<summary>...</summary>` block at the very beginning of the `.note` file. This block should contain a very short and concise but comprehensive summary of the lesson (2-4 phrases), in the source language of the notes (typically Italian). This summary is used as a description in the dashboard view. **IMPORTANT: when generating or updating a summary, you MUST read the entire `.note` file first to ensure the summary covers all main topics of the lesson.**
+13. **Lesson Summary**: Include an optional `<summary>...</summary>` block at the very beginning of the `.note` file. This block should contain a very short and concise but comprehensive summary of the lesson (2-4 phrases), in the source language of the notes (typically Italian). This summary is used as a description in the dashboard view. **IMPORTANT: when generating or updating a summary, you MUST read the entire `.note` file first to ensure the summary covers all main topics of the lesson. Avoid using unnecessary connectives and keep the style extremely telegraphic and direct.**
 
 ## Syntax Constraints
 
@@ -77,6 +77,8 @@ Make sure:
 
 - **Interaction**: Hovering over a `<reword>` block in the generated HTML will highlight all referenced `<box>` blocks in green, providing a clear visual link between the formal text and the source handwriting.
 
+- **Interspersing**: For long content (e.g., long proofs or detailed examples), avoid creating a single massive block of `<box>` tags followed by a single massive `<reword>` block. Instead, **intersperse** smaller pairs of `<box>` and `<reword>` blocks. Ideally, each `<reword>` block should correspond to roughly one paragraph in the generated HTML. This makes the document easier to navigate and improves the visual connection between specific handwritten fragments and their corresponding formal transcription.
+
 ## The `cards/` folder
 
 This contains flashcards for the course, in markdown format, typically generated directly from the `.note` transcription files. It uses https://borretti.me/article/hashcards-plain-text-spaced-repetition to generate flashcards.
@@ -86,10 +88,11 @@ This contains flashcards for the course, in markdown format, typically generated
 - Do not create a card file unless asked explicitly.
 
 1. **Format**: Flashcards must follow the expected Hashcards format:
-   - Cloze Deletion: `C: [Text] containing [one] or [more] deletions.` (often used for definitions, theorems, or statements)
+   - Cloze Deletion: `C: Text containing [one] or [more] deletions to hide.` (e.g. `C: La varietà $M$ è [orientabile].`)
    - Questions/Answers: `Q: [Question]` immediately followed by `A: [Answer]` (for explanations, properties, or proofs)
    - **LaTeX**: Use standard Markdown dollar delimiters for math (e.g., `$x$` for inline, `$$...$$` for block math). **Do not use the `<math>` tag in flashcard files.**
-   - Do not forget the document frontmatter (e.g., `--- \n name = "Istituzioni di Geometria - 2026-02-25" \n ---`) at the top of new files, appending the lesson date to the course name.
+   - **Frontmatter**: New files MUST start with a TOML frontmatter (e.g., `--- \n name = "Istituzioni di Geometria - 2026-02-25" \n ---`).
+   - **IMPORTANT**: Be careful with cloze deletions in math. If the notes use brackets for mathematical objects (e.g., a class $[S]$), DO NOT assume these are cloze deletions. If you want to hide a mathematical object, use double brackets or ensure the context is clear (e.g. `La classe fondamentale è [$[S]$].`). Cloze deletions are needed only for C type cards not Q/A cards.
 2. **Extraction**: Identify key learning items directly from the `.note` files, extracting content primarily from semantic wrappers like `<definition>`, `<proposition>`, `<exercise>`, `<oss>`, etc.
 3. **Fidelity to Original Text**: The terminology and phrasing used in the flashcards MUST closely match the specific wording present in the `<reword>` blocks (or the literal transcription in `<box>`). Do not paraphrase specific terms if the notes use a particular expression (e.g., use "letta in carte" instead of "espressa in coordinate locali" if that is what the original notes use).
 4. **Naming**: The card files should correspond to the date of the lesson (e.g., `cards/2026-02-25.md` for `lesson-2026-02-25.note`).

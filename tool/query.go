@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -148,9 +149,24 @@ var QueryCmd = &cobra.Command{
 		}
 
 		if histogramMode {
-			fmt.Println("Tag Histogram:")
+			type entry struct {
+				tag   string
+				count int
+			}
+			var entries []entry
 			for tag, count := range histogram {
-				fmt.Printf("  %s: %d\n", tag, count)
+				entries = append(entries, entry{tag, count})
+			}
+			sort.Slice(entries, func(i, j int) bool {
+				if entries[i].count == entries[j].count {
+					return entries[i].tag < entries[j].tag
+				}
+				return entries[i].count > entries[j].count
+			})
+
+			fmt.Println("Tag Histogram:")
+			for _, e := range entries {
+				fmt.Printf("  %s: %d\n", e.tag, e.count)
 			}
 		}
 

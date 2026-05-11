@@ -9,8 +9,9 @@
 :root {
   --bg-color: #fcfcfc;
   --text-color: #1a1a1a;
-  --accent-color: #ffde00; /* Bold Yellow */
+  --accent-color: #ffef86; /* Bold Yellow */
   --border-color: #000000;
+  --border-color-weak: #aaa;
   --card-bg: #ffffff;
   --secondary-bg: #e2e4e7;
   --dim-text: #444;
@@ -19,39 +20,58 @@
   --highlight-green: rgba(96, 222, 74, 0.4);
   --highlight-yellow: rgba(255, 222, 0, 0.4);
   --link-color: #2563eb;
+  --text-dim-mid: #666;
+  --text-dim-strong: #333;
 
   --theorem-bg: #f0f7ff;
   --lemma-bg: #fef2f2;
   --definition-bg: #ecfdf5;
   --proposition-bg: #f0f7ff;
   --corollary-bg: #fffbeb;
-  --exercise-bg: #fdf2f8;
+  --dim-bg: #f2fff0;
   --block-text: #000000;
 
   --border-width: 2px;
   --short-shadow-offset: 4px;
   --long-shadow-offset: 8px;
+  --shadow-color: var(--border-color);
+}
 
-  &[data-theme="dark"] {
-    --bg-color: #1a1b1e;
-    --text-color: #e2e8f0;
-    --accent-color: #fbbf24;
-    --link-color: var(--accent-color);
-    --border-color: #4b5563;
-    --card-bg: #24272e;
-    --secondary-bg: #4f5460;
-    --dim-text: #94a3b8;
-    --strong-text: #e2e8f0;
-    --highlight-green: rgba(52, 211, 153, 0.3);
-    --highlight-yellow: rgba(251, 191, 36, 0.3);
+[data-theme="dark"] {
+  --bg-color: #32302f;
+  --text-color: #ebdbb2;
+  --accent-color: #fabd2f;
+  --link-color: #83a598;
+  --border-color: hsl(from var(--bg-color) h s calc(l + 15));
+  --border-color-weak: hsl(from var(--bg-color) h s calc(l + 8));
+  --card-bg: #3c3836;
+  --secondary-bg: #282828;
+  --dim-text: #a89984;
+  --strong-text: #fbf1c7;
+  --highlight-green: #5a5a2c;
+  --highlight-yellow: #6e5a2f;
 
-    --theorem-bg: #2d3748;
-    --lemma-bg: #4c1d1d;
-    --definition-bg: #064e3b;
-    --proposition-bg: #2d3748;
-    --corollary-bg: #451a03;
-    --exercise-bg: #500724;
-    --block-text: #f1f5f9;
+  --theorem-bg: #384a4a;
+  --lemma-bg: #602c2a;
+  --definition-bg: #4e5b46;
+  --proposition-bg: #583f49;
+  --corollary-bg: #63502b;
+  --dim-bg: #414a40;
+  --block-text: #ebdbb2;
+  --text-dim-mid: #a89984;
+  --text-dim-strong: #ebdbb2;
+
+  --shadow-color: var(--border-color);
+
+  .theorem,
+  .lemma,
+  .definition,
+  .proposition,
+  .corollary,
+  .dim,
+  .entry-item {
+    --shadow-color: hsl(from var(--card-bg) h s calc(l + 15));
+    --border-color: var(--shadow-color);
   }
 }
 
@@ -121,6 +141,9 @@ a {
   padding: 0.5rem 1rem;
 
   box-shadow: 0 0 2rem 0 rgba(0, 0, 0, 0.2);
+  [data-theme="dark"] & {
+    box-shadow: 0 0 2rem 0 hsl(from var(--bg-color) h s calc(l - 15) / 0.4);
+  }
 }
 
 .breadcrumb-nav {
@@ -216,7 +239,7 @@ h2 {
   opacity: 0.9;
 
   [data-theme="dark"] & {
-    background: #1e293b;
+    background: rgba(235, 219, 178, 0.05);
   }
 
   .math {
@@ -257,7 +280,7 @@ h2 {
   max-width: 100%;
   max-height: 100%;
   box-shadow: var(--long-shadow-offset) var(--long-shadow-offset) 0px 0px
-    var(--border-color);
+    var(--shadow-color);
   border: var(--border-width) solid var(--border-color);
   background: var(--card-bg);
   display: grid;
@@ -276,7 +299,7 @@ h2 {
   background: var(--card-bg);
   border: var(--border-width) solid var(--border-color);
   box-shadow: var(--short-shadow-offset) var(--short-shadow-offset) 0px 0px
-    var(--border-color);
+    var(--shadow-color);
   padding: 1rem;
   margin-bottom: 1.5rem;
 
@@ -285,8 +308,8 @@ h2 {
     color: #000000;
 
     [data-theme="dark"] & {
-      background: #0891b2;
-      color: #f1f5f9;
+      background: #8ec07c;
+      color: #282828;
     }
   }
 }
@@ -294,7 +317,7 @@ h2 {
 .brutal-button {
   background: var(--card-bg);
   border: var(--border-width) solid var(--border-color);
-  box-shadow: 2px 2px 0px 0px var(--border-color);
+  box-shadow: 2px 2px 0px 0px var(--shadow-color);
   padding: 0.5rem 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -323,7 +346,7 @@ h2 {
   &:active {
     background: var(--accent-color);
     color: #000000;
-    box-shadow: 0px 0px 0px 0px var(--border-color);
+    box-shadow: 0px 0px 0px 0px var(--shadow-color);
     transform: translate(2px, 2px);
   }
 
@@ -390,7 +413,7 @@ h2 {
   border-bottom: none;
 
   box-shadow: var(--long-shadow-offset) var(--long-shadow-offset) 0px 0px
-    var(--border-color);
+    var(--shadow-color);
   background: var(--card-bg);
   overflow: hidden;
   position: relative;
@@ -409,29 +432,38 @@ h2 {
 .definition,
 .proposition,
 .corollary,
-.exercise {
+.dim {
+  background: var(--card-bg);
   border: var(--border-width) solid var(--border-color);
-  box-shadow: 4px 4px 0px 0px var(--border-color);
+  box-shadow: 4px 4px 0px 0px var(--shadow-color);
   padding: 0 1rem;
   margin: 1.5rem 0;
   color: var(--block-text);
 }
 
+div:has(+ .dim) {
+  margin-bottom: 0;
+}
+
+div + .dim {
+  margin-top: -2px;
+}
+
 .theorem,
 .proposition {
-  background: var(--theorem-bg);
+  --card-bg: var(--theorem-bg);
 }
 .lemma {
-  background: var(--lemma-bg);
+  --card-bg: var(--lemma-bg);
 }
 .definition {
-  background: var(--definition-bg);
+  --card-bg: var(--definition-bg);
 }
 .corollary {
-  background: #fffbeb;
+  --card-bg: var(--corollary-bg);
 }
-.exercise {
-  background: #fdf2f8;
+.dim {
+  --card-bg: var(--dim-bg);
 }
 
 .reword {
@@ -439,7 +471,7 @@ h2 {
   font-weight: 450;
 
   margin: 0.75rem 0;
-  color: var(--dim-text);
+  color: var(--text-color);
 }
 
 strong {
@@ -449,7 +481,7 @@ strong {
 
 .box-text {
   cursor: crosshair;
-  color: var(--text-color);
+  color: var(--dim-text);
   opacity: 0.5;
   font-size: 14px;
   margin: 1rem 0;
@@ -486,20 +518,21 @@ strong {
 
 .inline-image-crop {
   opacity: 1;
-  border-color: var(--border-color);
+  border-color: var(--border-color-weak);
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   margin: 1rem auto;
   max-width: 40rem;
   max-height: 50vh;
   border-radius: 0.25rem;
-  border-width: 2px;
-  border-style: solid;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
   background-color: #f3f4f6;
 
   [data-theme="dark"] & {
     background-color: #1f2937;
+    box-shadow: 0 4px 6px -1px hsl(from var(--bg-color) h s calc(l - 15) / 0.4);
   }
 
   @media screen and (max-width: 1300px) {
@@ -583,18 +616,18 @@ strong {
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--border-color);
     background: var(--bg-color);
-    box-shadow: 2px 2px 0px var(--border-color);
+    box-shadow: 2px 2px 0px var(--shadow-color);
     transition: all 0.1s;
 
     &:hover {
       transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0px var(--border-color);
+      box-shadow: 3px 3px 0px var(--shadow-color);
       background: var(--accent-color);
     }
 
     &:active {
       transform: translate(1px, 1px);
-      box-shadow: 0px 0px 0px var(--border-color);
+      box-shadow: 0px 0px 0px var(--shadow-color);
     }
   }
 }
@@ -636,7 +669,7 @@ strong {
   padding: 0.75rem 1rem 0.75rem 0.75rem;
   background: var(--card-bg);
   border: var(--border-width) solid var(--border-color);
-  box-shadow: 4px 4px 0px var(--border-color);
+  box-shadow: 4px 4px 0px var(--shadow-color);
   text-decoration: none;
   color: var(--text-color);
   gap: 0.5rem;
@@ -648,16 +681,18 @@ strong {
   }
 
   &.is-dir {
-    background: #e0f2fe;
+    --card-bg: #e0f2fe;
     [data-theme="dark"] & {
-      background: #0c4a6e;
+      --card-bg: #344c4a;
+      color: #ebdbb2;
     }
   }
 
   &.is-file {
-    background: #fefce8;
+    --card-bg: #fefce8;
     [data-theme="dark"] & {
-      background: #422006;
+      --card-bg: #4a3434;
+      color: #fbf1c7;
     }
   }
 }
@@ -691,7 +726,7 @@ strong {
   font-weight: 425;
   font-size: 1rem;
   line-height: 1.4;
-  color: var(--dim-text);
+  color: var(--text-dim-mid);
   margin-top: 0.25rem;
 
   .math {
@@ -703,7 +738,7 @@ strong {
     display: block !important;
 
     strong {
-      color: var(--dim-text-strong);
+      color: var(--text-dim-strong);
       font-weight: 650;
     }
   }
@@ -716,7 +751,7 @@ strong {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   padding: 0.2rem;
-  box-shadow: 2px 2px 0px var(--border-color);
+  box-shadow: 2px 2px 0px var(--shadow-color);
   transition: all 0.1s;
 
   min-height: 3rem;
@@ -724,7 +759,7 @@ strong {
   &:not(:hover) {
     background: rgb(from var(--card-bg) r g b / 0.2);
     border-color: rgb(from var(--border-color) r g b / 0.2);
-    box-shadow: 2px 2px 0px rgb(from var(--border-color) r g b / 0.2);
+    box-shadow: 2px 2px 0px rgb(from var(--shadow-color) r g b / 0.2);
 
     > .counter-btn {
       opacity: 0;

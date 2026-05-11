@@ -3,6 +3,10 @@
  * Neo-Brutalist Edition - No Animations, Direct Snapping.
  */
 
+// Initialize DEBUG from script tag
+const debugEl = document.getElementById("debug-data");
+window.DEBUG = debugEl ? JSON.parse(debugEl.textContent) : false;
+
 const imgEl = document.getElementById("current-image");
 const highlight = document.getElementById("highlight");
 const lensContainer = document.getElementById("lens-container");

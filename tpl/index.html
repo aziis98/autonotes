@@ -22,6 +22,9 @@
             ["$$", "$$"],
             ["\\[", "\\]"],
           ],
+          macros: {
+            coloneqq: ":=",
+          },
           packages: { "[+]": ["ams", "amscd"] },
         },
         loader: { load: ["[tex]/ams", "[tex]/amscd"] },
@@ -39,6 +42,9 @@
       async
     ></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script id="debug-data" type="application/json">
+      {{.Debug}}
+    </script>
   </head>
   <body class="dashboard-body compact-mode">
     <header class="compact-header">

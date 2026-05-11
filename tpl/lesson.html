@@ -16,6 +16,9 @@
             ["$$", "$$"],
             ["\\[", "\\]"],
           ],
+          macros: {
+            coloneqq: ":=",
+          },
           packages: { "[+]": ["ams", "amscd"] },
         },
         loader: { load: ["[tex]/ams", "[tex]/amscd"] },
@@ -40,8 +43,8 @@
     />
     <link rel="stylesheet" href="{{.StaticPath}}styles.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      window.DEBUG = {{.Debug}};
+    <script id="debug-data" type="application/json">
+      {{.Debug}}
     </script>
   </head>
   <body>
