@@ -80,6 +80,13 @@
         >
           <i data-lucide="crosshair" size="18"></i>
         </button>
+        <button
+          id="toggle-boxes"
+          class="brutal-button icon"
+          title="Highlight All Boxes"
+        >
+          <i data-lucide="brick-wall" size="18"></i>
+        </button>
         <button id="toggle-preview" class="brutal-button preview-toggle">
           Toggle Images
         </button>
@@ -112,6 +119,7 @@
         <div id="image-container">
           <img id="current-image" src="" />
           <div id="highlight" class="highlight-box"></div>
+          <div id="all-boxes-overlay" class="all-boxes-overlay hidden"></div>
           <div id="inspector-overlay" class="inspector-overlay hidden">
             <div id="inspector-selection" class="inspector-selection"></div>
           </div>

@@ -16,7 +16,6 @@ var (
 	selectFilter  string
 	grepFilter    string
 	extractFilter string
-	histogramMode bool
 	verboseMode   bool
 )
 
@@ -33,7 +32,10 @@ var QueryCmd = &cobra.Command{
   autonotes query --select definition --extract reword
 
   # Show counts for all found tag types
-  autonotes query --histogram
+  autonotes query histogram
+
+  # Show counts for all found tag types in a specific subfolder
+  autonotes query histogram src/ist-geom
 
   # Verbose output for debugging
   autonotes query -v --grep "topologia"`,
@@ -56,8 +58,6 @@ var QueryCmd = &cobra.Command{
 		if verboseMode {
 			fmt.Fprintf(os.Stderr, "Found %d files.\n", len(files))
 		}
-
-		histogram := make(map[string]int)
 
 		var selectedTypes []string
 		if selectFilter != "" && selectFilter != "all" {
@@ -123,13 +123,8 @@ var QueryCmd = &cobra.Command{
 					}
 				}
 
-				if histogramMode {
-					histogram[block.Name]++
-					foundAny = true
-					continue
-				}
-
 				foundAny = true
+
 				// Extract and Print
 				fmt.Printf("[%s] %s\n", file, block.Name)
 				printer := NewPrinter(os.Stdout)
@@ -145,28 +140,6 @@ var QueryCmd = &cobra.Command{
 					}
 				}
 				fmt.Println()
-			}
-		}
-
-		if histogramMode {
-			type entry struct {
-				tag   string
-				count int
-			}
-			var entries []entry
-			for tag, count := range histogram {
-				entries = append(entries, entry{tag, count})
-			}
-			sort.Slice(entries, func(i, j int) bool {
-				if entries[i].count == entries[j].count {
-					return entries[i].tag < entries[j].tag
-				}
-				return entries[i].count > entries[j].count
-			})
-
-			fmt.Println("Tag Histogram:")
-			for _, e := range entries {
-				fmt.Printf("  %s: %d\n", e.tag, e.count)
 			}
 		}
 
@@ -218,8 +191,85 @@ func init() {
 	QueryCmd.Flags().StringVarP(&selectFilter, "select", "s", "all", "Filter blocks by type")
 	QueryCmd.Flags().StringVarP(&grepFilter, "grep", "g", "", "Search text in blocks")
 	QueryCmd.Flags().StringVarP(&extractFilter, "extract", "e", "", "Extract specific child blocks")
-	QueryCmd.Flags().BoolVar(&histogramMode, "histogram", false, "Print counts for all found tag types")
 	QueryCmd.Flags().BoolVarP(&verboseMode, "verbose", "v", false, "Print globbing and parsing details to stderr")
 
 	QueryCmd.AddCommand(querySummaryCmd)
+	QueryCmd.AddCommand(histogramCmd)
+}
+
+var histogramCmd = &cobra.Command{
+	Use:   "histogram [subfolder]",
+	Short: "Print counts for all found tag types",
+	Run: func(cmd *cobra.Command, args []string) {
+		root := "src"
+		if len(args) > 0 {
+			root = args[0]
+		}
+
+		if verboseMode {
+			fmt.Fprintf(os.Stderr, "Searching in %s...\n", root)
+		}
+
+		var files []string
+		filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+			if err == nil && !d.IsDir() && strings.HasSuffix(path, ".note") {
+				files = append(files, path)
+			}
+			return nil
+		})
+
+		histogram := make(map[string]int)
+
+		for _, file := range files {
+			content, err := os.ReadFile(file)
+			if err != nil {
+				continue
+			}
+
+			p := NewParser(string(content))
+			ast, err := p.Parse()
+			if err != nil {
+				continue
+			}
+
+			rootNode, ok := ast.(*BlockNode)
+			if !ok {
+				continue
+			}
+
+			lessonNode := rootNode.FindChild("lesson")
+			if lessonNode == nil {
+				continue
+			}
+
+			for _, child := range lessonNode.Children {
+				block, ok := child.(*BlockNode)
+				if !ok || block.Name == "summary" || block.Name == "box" || block.Name == "image" || block.Name == "reword" {
+					continue
+				}
+				histogram[block.Name]++
+			}
+		}
+
+		type entry struct {
+			tag   string
+			count int
+		}
+
+		var entries []entry
+		for tag, count := range histogram {
+			entries = append(entries, entry{tag, count})
+		}
+		sort.Slice(entries, func(i, j int) bool {
+			if entries[i].count == entries[j].count {
+				return entries[i].tag < entries[j].tag
+			}
+			return entries[i].count > entries[j].count
+		})
+
+		fmt.Println("Tag Histogram:")
+		for _, e := range entries {
+			fmt.Printf("  %s: %d\n", e.tag, e.count)
+		}
+	},
 }

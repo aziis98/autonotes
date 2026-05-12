@@ -12,6 +12,7 @@ const highlight = document.getElementById("highlight");
 const lensContainer = document.getElementById("lens-container");
 const lensScaler = document.getElementById("lens-scaler");
 const lensImg = document.getElementById("lens-image");
+const allBoxesOverlay = document.getElementById("all-boxes-overlay");
 
 /**
  * Update the high-resolution crop preview (The Lens)
@@ -221,6 +222,64 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+  // Highlight All Boxes Logic
+  const toggleBoxes = document.getElementById("toggle-boxes");
+  let showAllBoxes = localStorage.getItem("show-all-boxes") === "true";
+
+  function updateAllBoxesHighlights() {
+    if (!allBoxesOverlay || !imgEl) return;
+    allBoxesOverlay.innerHTML = "";
+    if (!showAllBoxes) {
+      allBoxesOverlay.classList.add("hidden");
+      return;
+    }
+    allBoxesOverlay.classList.remove("hidden");
+
+    const currentSrc = imgEl.src;
+    if (!currentSrc) return;
+
+    const rectW = imgEl.clientWidth;
+    const rectH = imgEl.clientHeight;
+    if (rectW === 0 || rectH === 0) return;
+
+    const boxes = document.querySelectorAll(".box-text, .inline-image-crop");
+    boxes.forEach((box) => {
+      const boxImg =
+        box.getAttribute("data-img") || box.getAttribute("data-src");
+      if (boxImg && currentSrc.endsWith(boxImg)) {
+        const t = parseFloat(box.getAttribute("data-top"));
+        const r = parseFloat(box.getAttribute("data-right"));
+        const b = parseFloat(box.getAttribute("data-bottom"));
+        const l = parseFloat(box.getAttribute("data-left"));
+
+        if (!isNaN(t) && !isNaN(r) && !isNaN(b) && !isNaN(l)) {
+          const hl = document.createElement("div");
+          hl.className = "box-highlight";
+          hl.style.top = (t / 1000) * rectH + "px";
+          hl.style.left = (l / 1000) * rectW + "px";
+          hl.style.width = ((r - l) / 1000) * rectW + "px";
+          hl.style.height = ((b - t) / 1000) * rectH + "px";
+          allBoxesOverlay.appendChild(hl);
+        }
+      }
+    });
+  }
+
+  if (toggleBoxes) {
+    if (showAllBoxes) toggleBoxes.classList.add("active");
+    updateAllBoxesHighlights();
+
+    toggleBoxes.addEventListener("click", () => {
+      showAllBoxes = !showAllBoxes;
+      toggleBoxes.classList.toggle("active", showAllBoxes);
+      localStorage.setItem("show-all-boxes", showAllBoxes);
+      updateAllBoxesHighlights();
+    });
+  }
+
+  imgEl.addEventListener("load", updateAllBoxesHighlights);
+  window.addEventListener("resize", updateAllBoxesHighlights);
+
   // Initialize Lucide Icons
   if (window.lucide) {
     window.lucide.createIcons();
@@ -293,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        if (foundAny) {
+        if (foundAny && !e.target.closest(".box-text, .inline-image-crop")) {
           setHighlight(commonImg, minT, maxR, maxB, minL);
         }
       }
@@ -446,6 +505,8 @@ document.addEventListener("DOMContentLoaded", () => {
           clearHighlight();
           imgEl.src = imgSrc;
         }
+
+        updateAllBoxesHighlights();
       }
     }
   });

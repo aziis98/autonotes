@@ -365,6 +365,21 @@ h2 {
   display: none;
 }
 
+.all-boxes-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.all-boxes-overlay .box-highlight {
+  position: absolute;
+  background-color: rgba(128, 128, 128, 0.2);
+  border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
 .inspector-overlay {
   position: absolute;
   top: 0;
