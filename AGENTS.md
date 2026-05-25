@@ -29,13 +29,13 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
 6. **Rewording**: It is mandatory to provide a formal, professional mathematical rewrite of the transcribed text. Use `<reword>...</reword>` blocks to contain this formal version. These blocks can be used as children of semantic wrappers (like `<theorem>`) or placed freely at the top-level for more general commentary. The renderer styles these with a textbook-like appearance (serif font, gray border).
    - **Fidelity**: The `<reword>` block MUST follow the original handwritten text closely. Do not remove any information present in the source `<box>` tags. The goal is to make the content readable and grammatically correct by adding minimal connectives and formal formatting, while preserving 100% of the mathematical and logical substance.
-   - Within `<reword>`, start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Teorema (Nome).</strong>` or `<strong>Definizione.</strong>`). Always use the Italian terminology: **Teorema**, **Definizione**, **Proposizione**, **Lemma**, **Corollario**, **Esercizio**, **Dimostrazione**, **Esempio**, **Osservazione**, **Nota**.
+   - Within `<reword>`, start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Theorem (Name).</strong>` or `<strong>Definition.</strong>`). Always use the English terminology: **Theorem**, **Definition**, **Proposition**, **Lemma**, **Corollary**, **Exercise**, **Proof**, **Example**, **Remark**, **Note**.
 
 7. **Lists**: Use `<itemize>` or `<enumerate>` for bulleted or numbered lists, placing each entry inside an `<item>...</item>` tag.
 
 8. **Mathematical Equations**: Enclose any inline or block math using the `<math>...</math>` tag using standard LaTeX expressions (e.g., `<math>1+\frac{1}{2}</math>`). You can also use `<math display="true">...</math>` for display block rendering via KaTeX.
 
-9. **Verify Elements**: Use semantic wrappers such as `<theorem>`, `<lemma>`, `<definition>`, `<richiami>`, `<oss>`, `<dim>`.
+9. **Verify Elements**: Use semantic wrappers such as `<theorem>`, `<lemma>`, `<definition>`, `<recall>`, `<remark>`, `<proof>`.
 
 10. **Complex Diagrams**: For complex commutative diagrams or structures that are difficult to reproduce accurately with LaTeX, prefer using an `<image>` tag to crop the original handwritten version directly. Place the `<image>` tag as a sibling to the `<reword>` block within the appropriate semantic wrapper.
 
@@ -43,14 +43,18 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
 12. **Inline Formatting**: Use `<strong>...</strong>` for bold text and `<emph>...</emph>` for emphasis (italics). Do not use markdown-style `**...**` or `*...*` expressions, as the renderer requires explicit tags for inline styling.
 
-13. **Lesson Summary**: Include an optional `<summary>...</summary>` block at the very beginning of the `.note` file. This block should contain a very short and concise but comprehensive summary of the lesson (2-4 phrases), in the source language of the notes (typically Italian). This summary is used as a description in the dashboard view. **IMPORTANT: when generating or updating a summary, you MUST read the entire `.note` file first to ensure the summary covers all main topics of the lesson. Avoid using unnecessary connectives and keep the style extremely telegraphic and direct.**
+13. **Lesson Summary**: Include an optional `<summary>...</summary>` block at the very beginning of the `.note` file. This block should contain a very short and concise but comprehensive summary of the lesson (2-4 phrases), in the source language of the notes. This summary is used as a description in the dashboard view. **IMPORTANT: when generating or updating a summary, you MUST read the entire `.note` file first to ensure the summary covers all main topics of the lesson. Avoid using unnecessary connectives and keep the style extremely telegraphic and direct.**
+
+## Note Language
+
+The preferred language for the `.note` files is to follow the language used in the original handwritten notes in the pictures and images. Do not translate them to English.
 
 ## Syntax Constraints
 
 A valid note file incorporates an unstructured XML-like hierarchy:
 
 ```xml
-<lesson date="2026-02-25" course="Istituzioni di Geometria">
+<lesson date="2026-02-25" course="Foundations of Geometry">
   <summary>
     A short and concise summary of the lesson.
   </summary>
@@ -90,11 +94,11 @@ This contains flashcards for the course, in markdown format, typically generated
 - Do not create a card file unless asked explicitly.
 
 1. **Format**: Flashcards must follow the expected Hashcards format:
-   - Cloze Deletion: `C: Text containing [one] or [more] deletions to hide.` (e.g. `C: La varietà $M$ è [orientabile].`)
+   - Cloze Deletion: `C: Text containing [one] or [more] deletions to hide.` (e.g. `C: The manifold $M$ is [orientable].`)
    - Questions/Answers: `Q: [Question]` immediately followed by `A: [Answer]` (for explanations, properties, or proofs)
    - **LaTeX**: Use standard Markdown dollar delimiters for math (e.g., `$x$` for inline, `$$...$$` for block math). **Do not use the `<math>` tag in flashcard files.**
-   - **Frontmatter**: New files MUST start with a TOML frontmatter (e.g., `--- \n name = "Istituzioni di Geometria - 2026-02-25" \n ---`).
-   - **IMPORTANT**: Be careful with cloze deletions in math. If the notes use brackets for mathematical objects (e.g., a class $[S]$), DO NOT assume these are cloze deletions. If you want to hide a mathematical object, use double brackets or ensure the context is clear (e.g. `La classe fondamentale è [$[S]$].`). Cloze deletions are needed only for C type cards not Q/A cards.
-2. **Extraction**: Identify key learning items directly from the `.note` files, extracting content primarily from semantic wrappers like `<definition>`, `<proposition>`, `<exercise>`, `<oss>`, etc.
-3. **Fidelity to Original Text**: The terminology and phrasing used in the flashcards MUST closely match the specific wording present in the `<reword>` blocks (or the literal transcription in `<box>`). Do not paraphrase specific terms if the notes use a particular expression (e.g., use "letta in carte" instead of "espressa in coordinate locali" if that is what the original notes use).
+   - **Frontmatter**: New files MUST start with a TOML frontmatter (e.g., `--- \n name = "Foundations of Geometry - 2026-02-25" \n ---`).
+   - **IMPORTANT**: Be careful with cloze deletions in math. If the notes use brackets for mathematical objects (e.g., a class $[S]$), DO NOT assume these are cloze deletions. If you want to hide a mathematical object, use double brackets or ensure the context is clear (e.g. `The fundamental class is [$[S]$].`). Cloze deletions are needed only for C type cards not Q/A cards.
+2. **Extraction**: Identify key learning items directly from the `.note` files, extracting content primarily from semantic wrappers like `<definition>`, `<proposition>`, `<exercise>`, `<remark>`, etc.
+3. **Fidelity to Original Text**: The terminology and phrasing used in the flashcards MUST closely match the specific wording present in the `<reword>` blocks (or the literal transcription in `<box>`). Do not paraphrase specific terms if the notes use a particular expression (e.g., use "read in charts" instead of "expressed in local coordinates" if that is what the original notes use).
 4. **Naming**: The card files should correspond to the date of the lesson (e.g., `cards/2026-02-25.md` for `lesson-2026-02-25.note`).
