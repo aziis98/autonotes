@@ -378,6 +378,14 @@ h2 {
   position: absolute;
   background-color: rgba(128, 128, 128, 0.2);
   border: 1px solid rgba(128, 128, 128, 0.3);
+  transition:
+    background-color 0.1s ease,
+    border-color 0.1s ease;
+}
+
+.all-boxes-overlay .box-highlight:hover {
+  background-color: rgba(128, 128, 128, 0.45);
+  border-color: rgba(128, 128, 128, 0.6);
 }
 
 .inspector-overlay {
@@ -538,7 +546,7 @@ strong {
   border-style: solid;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   margin: 1rem auto;
-  max-width: 40rem;
+  max-width: 100%;
   max-height: 50vh;
   border-radius: 0.25rem;
   overflow: hidden;
@@ -550,8 +558,11 @@ strong {
     box-shadow: 0 4px 6px -1px hsl(from var(--bg-color) h s calc(l - 15) / 0.4);
   }
 
-  @media screen and (max-width: 1300px) {
-    max-width: 50ch;
+  img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
   }
 }
 
@@ -675,10 +686,11 @@ strong {
   max-width: 64rem;
   margin: 0 auto;
   display: grid;
-  gap: 1rem;
 }
 
 .entry-item {
+  position: relative;
+  cursor: pointer;
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem 0.75rem 0.75rem;
@@ -689,27 +701,42 @@ strong {
   color: var(--text-color);
   gap: 0.5rem;
 
+  &:not(:last-child) {
+    border-bottom: none;
+  }
+
   &:hover {
-    border-width: 3px;
-    padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px)
-      calc(0.75rem - 1px);
+    background: var(--card-bg-hover);
   }
 
   &.is-dir {
     --card-bg: #e0f2fe;
+    --card-bg-hover: hsl(204, 75%, 90%);
     [data-theme="dark"] & {
       --card-bg: #344c4a;
+      --card-bg-hover: hsl(173, 16%, 30%);
       color: #ebdbb2;
     }
   }
 
   &.is-file {
     --card-bg: #fefce8;
+    --card-bg-hover: hsl(58, 75%, 90%);
     [data-theme="dark"] & {
       --card-bg: #4a3434;
+      --card-bg-hover: hsl(0, 16%, 30%);
       color: #fbf1c7;
     }
   }
+}
+
+.entry-link-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
 .entry-icon {
@@ -760,6 +787,9 @@ strong {
 }
 
 .entry-counter {
+  position: relative;
+  z-index: 2;
+  cursor: default;
   display: flex;
   align-items: center;
   gap: 0.25rem;

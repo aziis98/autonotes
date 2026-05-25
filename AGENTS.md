@@ -79,6 +79,8 @@ Make sure:
 
 - **Interspersing**: For long content (e.g., long proofs or detailed examples), avoid creating a single massive block of `<box>` tags followed by a single massive `<reword>` block. Instead, **intersperse** smaller pairs of `<box>` and `<reword>` blocks. Ideally, each `<reword>` block should correspond to roughly one paragraph in the generated HTML. This makes the document easier to navigate and improves the visual connection between specific handwritten fragments and their corresponding formal transcription.
 
+- **No HTML Comments**: Do NOT write HTML comments (e.g. `<!-- comment -->`) inside `.note` files, as they are not supported/desired.
+
 ## The `cards/` folder
 
 This contains flashcards for the course, in markdown format, typically generated directly from the `.note` transcription files. It uses https://borretti.me/article/hashcards-plain-text-spaced-repetition to generate flashcards.

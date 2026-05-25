@@ -84,6 +84,7 @@ func validateNotes(srcDir string) ([]string, []string, error) {
 			checker := &ReferenceChecker{path: path, declaredUIDs: declaredUIDs}
 			ast.Accept(checker)
 			allErrors = append(allErrors, checker.errors...)
+			allWarnings = append(allWarnings, checker.warnings...)
 
 			// 3. Check image existence
 			collectionDir := filepath.Dir(path)
@@ -120,10 +121,24 @@ type ReferenceChecker struct {
 	path         string
 	declaredUIDs map[string]bool
 	errors       []string
+	warnings     []string
 }
 
 func (c *ReferenceChecker) VisitText(n *TextNode) {}
 func (c *ReferenceChecker) VisitBlock(n *BlockNode) {
+	if n.Name == "reword" {
+		if n.Attr("ref") == "" {
+			var sb strings.Builder
+			collectTextIgnoringMath(n, &sb)
+			snippet := strings.TrimSpace(sb.String())
+			if len(snippet) > 40 {
+				snippet = snippet[:40] + "..."
+			}
+			snippet = strings.ReplaceAll(snippet, "\n", " ")
+			c.warnings = append(c.warnings, fmt.Sprintf("%s: <reword> block has no 'ref' attribute (%s)", c.path, snippet))
+		}
+	}
+
 	if ref := n.Attr("ref"); ref != "" {
 		refs := ExpandRefs(ref)
 		for _, r := range refs {
@@ -177,10 +192,11 @@ type MathValidator struct {
 }
 
 func (v *MathValidator) VisitText(n *TextNode) {}
+
 func (v *MathValidator) VisitBlock(n *BlockNode) {
 	if n.Name == "reword" {
 		var sb strings.Builder
-		v.collectTextIgnoringMath(n, &sb)
+		collectTextIgnoringMath(n, &sb)
 		text := sb.String()
 
 		if idx := strings.Index(text, "$"); idx != -1 {
@@ -200,7 +216,7 @@ func (v *MathValidator) VisitBlock(n *BlockNode) {
 	}
 }
 
-func (v *MathValidator) collectTextIgnoringMath(n Node, sb *strings.Builder) {
+func collectTextIgnoringMath(n Node, sb *strings.Builder) {
 	if t, ok := n.(*TextNode); ok {
 		sb.WriteString(t.Content)
 	} else if b, ok := n.(*BlockNode); ok {
@@ -208,7 +224,7 @@ func (v *MathValidator) collectTextIgnoringMath(n Node, sb *strings.Builder) {
 			return
 		}
 		for _, child := range b.Children {
-			v.collectTextIgnoringMath(child, sb)
+			collectTextIgnoringMath(child, sb)
 		}
 	}
 }

@@ -259,6 +259,42 @@ document.addEventListener("DOMContentLoaded", () => {
           hl.style.left = (l / 1000) * rectW + "px";
           hl.style.width = ((r - l) / 1000) * rectW + "px";
           hl.style.height = ((b - t) / 1000) * rectH + "px";
+          hl.style.pointerEvents = "auto";
+          hl.style.cursor = "pointer";
+
+          hl.addEventListener("click", () => {
+            let targetEl = box;
+            const ocrOff = document.body.classList.contains(
+              "transcription-hidden",
+            );
+            if (ocrOff && box.classList.contains("box-text")) {
+              // Find the first reword referencing this box's ID
+              const boxId = box.id;
+              let reword = null;
+              if (boxId) {
+                reword = Array.from(document.querySelectorAll(".reword")).find(
+                  (rw) => {
+                    const refs = rw.getAttribute("data-ref");
+                    return refs && refs.split(" ").includes(boxId);
+                  },
+                );
+              }
+              // If not found, look for the first reword inside the parent container of the box
+              if (!reword) {
+                const parent = box.parentElement;
+                if (parent) {
+                  reword = parent.querySelector(".reword");
+                }
+              }
+              if (reword) {
+                targetEl = reword;
+              }
+            }
+            if (targetEl) {
+              targetEl.scrollIntoView({ block: "center", behavior: "smooth" });
+            }
+          });
+
           allBoxesOverlay.appendChild(hl);
         }
       }
@@ -277,7 +313,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  imgEl.addEventListener("load", updateAllBoxesHighlights);
+  if (imgEl) {
+    imgEl.addEventListener("load", updateAllBoxesHighlights);
+  }
   window.addEventListener("resize", updateAllBoxesHighlights);
 
   // Initialize Lucide Icons
@@ -410,6 +448,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Inline Image Crops
+  // Sizing configuration constants:
+  // - MIN_RESCALE_WIDTH: Relative width (0.0 to 1.0) of container when crop width is 0% of page.
+  // - MAX_RESCALE_WIDTH: Relative width (0.0 to 1.0) of container when crop width is 100% of page.
+  const MIN_RESCALE_WIDTH = 0.0;
+  const MAX_RESCALE_WIDTH = 1.5;
+
   document.querySelectorAll(".inline-image-crop").forEach((container) => {
     const src = container.getAttribute("data-src");
     const right = parseFloat(container.getAttribute("data-right"));
@@ -417,30 +461,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const bottom = parseFloat(container.getAttribute("data-bottom"));
     const top = parseFloat(container.getAttribute("data-top"));
 
+    const rightVal = isNaN(right) ? 1000 : right;
+    const leftVal = isNaN(left) ? 0 : left;
+    const topVal = isNaN(top) ? 0 : top;
+    const bottomVal = isNaN(bottom) ? 1000 : bottom;
+
     const img = new Image();
     img.src = src;
     img.onload = () => {
       const natW = img.naturalWidth;
       const natH = img.naturalHeight;
-      const cropW = ((right - left) / 1000) * natW;
-      const cropH = ((bottom - top) / 1000) * natH;
-      const aspectRatio = cropW / cropH;
 
-      const finalW = container.clientWidth;
-      const finalH = finalW / aspectRatio;
+      const sx = (leftVal / 1000) * natW;
+      const sy = (topVal / 1000) * natH;
+      const sWidth = Math.max(1, ((rightVal - leftVal) / 1000) * natW);
+      const sHeight = Math.max(1, ((bottomVal - topVal) / 1000) * natH);
 
-      container.style.height = finalH + "px";
+      const canvas = document.createElement("canvas");
+      canvas.width = sWidth;
+      canvas.height = sHeight;
 
-      const innerImg = document.createElement("img");
-      innerImg.src = src;
-      innerImg.style.position = "absolute";
-      innerImg.style.width = (1000 / (right - left)) * 100 + "%";
-      innerImg.style.left = -((left / (right - left)) * 100) + "%";
-      innerImg.style.top = -((top / (bottom - top)) * 100) + "%";
-      innerImg.style.height = (1000 / (bottom - top)) * 100 + "%";
-      innerImg.style.maxWidth = "none";
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
 
-      container.appendChild(innerImg);
+      const croppedImg = new Image();
+      croppedImg.src = canvas.toDataURL();
+      croppedImg.style.width = "100%";
+      croppedImg.style.display = "block";
+
+      const cropRatio = Math.max(0.001, (rightVal - leftVal) / 1000);
+      const mappedRatio =
+        MIN_RESCALE_WIDTH + (MAX_RESCALE_WIDTH - MIN_RESCALE_WIDTH) * cropRatio;
+      const finalWidthPercent = Math.min(100, Math.max(0, mappedRatio * 100));
+      container.style.setProperty("--crop-ratio", cropRatio);
+      container.style.width = finalWidthPercent + "%";
+      container.innerHTML = "";
+      container.appendChild(croppedImg);
     };
   });
 
@@ -467,7 +523,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (now - lastScrollUpdate < 150) return; // Throttle to 150ms
       lastScrollUpdate = now;
 
-      const elements = document.querySelectorAll(".box-text, .reword");
+      const ocrOff = body.classList.contains("transcription-hidden");
+      const selector = ocrOff ? ".reword" : ".box-text, .reword";
+      const elements = document.querySelectorAll(selector);
       let closest = null;
       let minDistance = Infinity;
 
@@ -503,6 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Compare normalized href if src is a full URL
         if (imgSrc && !imgEl.src.endsWith(imgSrc)) {
           clearHighlight();
+          if (allBoxesOverlay) allBoxesOverlay.innerHTML = "";
           imgEl.src = imgSrc;
         }
 

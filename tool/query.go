@@ -125,6 +125,8 @@ var QueryCmd = &cobra.Command{
 
 				foundAny = true
 
+				foundAny = true
+
 				// Extract and Print
 				fmt.Printf("[%s] %s\n", file, block.Name)
 				printer := NewPrinter(os.Stdout)
