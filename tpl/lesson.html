@@ -97,13 +97,36 @@
       <!-- Left Column: Transcription -->
       <article id="left-column">
         <div class="content-wrapper">
-          <h1 class="lesson-title">{{.Title}}</h1>
-          {{if .Summary}}
-          <div class="lesson-summary-card">
-            {{.Summary}}
+          <div class="lesson-header-row">
+            <h1 class="lesson-title">{{.Title}}</h1>
+            {{if .Tags}}
+            <div class="lesson-tags">
+              {{range .Tags}}
+              <span class="tag-badge">{{.}}</span>
+              {{end}}
+            </div>
+            {{end}}
           </div>
+          {{if .Summary}}
+          <div class="lesson-summary-card">{{.Summary}}</div>
           {{end}}
           <div class="note-content">{{.Content}}</div>
+
+          {{if or .PrevPath .NextPath}}
+          <div class="lesson-nav-buttons">
+            {{if .PrevPath}}
+            <a href="{{.PrevPath}}" class="brutal-button prev-button">
+              <i data-lucide="chevron-left" size="16"></i> {{.PrevTitle}}
+            </a>
+            {{else}}
+            <div></div>
+            {{end}} {{if .NextPath}}
+            <a href="{{.NextPath}}" class="brutal-button next-button">
+              {{.NextTitle}} <i data-lucide="chevron-right" size="16"></i>
+            </a>
+            {{end}}
+          </div>
+          {{end}}
         </div>
 
         <!-- Lens Crop View Wrapper (Neo-Brutalist Card) -->

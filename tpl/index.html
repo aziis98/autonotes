@@ -58,6 +58,9 @@
           {{else}}
           <span class="root-label">Root</span>
           {{end}}
+          <a href="{{.StaticPath}}search.html" class="nav-search" title="Search Notes">
+            <i data-lucide="search" size="14"></i> Search
+          </a>
         </nav>
       </div>
       <div class="header-right">
@@ -86,7 +89,16 @@
             {{end}}
           </div>
           <div class="entry-info">
-            <span class="entry-name">{{.Name}}{{if .IsDir}}/{{end}}</span>
+            <div class="entry-header-row">
+              <span class="entry-name">{{.Name}}{{if .IsDir}}/{{end}}</span>
+              {{if .Tags}}
+              <div class="entry-tags">
+                {{range .Tags}}
+                <span class="tag-badge">{{.}}</span>
+                {{end}}
+              </div>
+              {{end}}
+            </div>
             {{if .IsDir}}<span class="entry-meta">Directory</span>{{end}} {{if
             .Summary}}
             <div class="entry-summary">{{.Summary}}</div>
@@ -105,8 +117,6 @@
         {{end}}
       </section>
     </main>
-
-    <footer class="compact-footer">AutoNotes • {{len .Entries}} items</footer>
 
     <script type="module" src="{{.StaticPath}}app.js"></script>
   </body>

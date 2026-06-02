@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search - AutoNotes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Recursive:wght@300..1000&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"],
+          ],
+          macros: {
+            coloneqq: ":=",
+          },
+          packages: { "[+]": ["ams", "amscd"] },
+        },
+        loader: { load: ["[tex]/ams", "[tex]/amscd"] },
+        startup: {
+          typeset: false,
+        },
+        options: {
+          enableMenu: false,
+        },
+      };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+      id="MathJax-script"
+      async
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-body compact-mode">
+    <header class="compact-header">
+      <div class="header-left">
+        <h1 class="compact-title">AutoNotes Search</h1>
+        <nav class="compact-nav">
+          <a href="index.html" class="nav-back">
+            <i data-lucide="chevron-left" size="14"></i> Dashboard
+          </a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <button
+          id="theme-toggle"
+          class="brutal-button icon"
+          title="Toggle Theme"
+        >
+          <i data-lucide="sun-moon" size="18"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="compact-main search-main">
+      <div class="search-container">
+        <!-- Search bar with icon -->
+        <div class="search-input-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search theorems, definitions, equations..."
+            autocomplete="off"
+            autofocus
+          />
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="search-filters" id="search-filters">
+          <button class="filter-pill active" data-type="all">All Items</button>
+          <button class="filter-pill" data-type="theorem">Theorems</button>
+          <button class="filter-pill" data-type="definition">Definitions</button>
+          <button class="filter-pill" data-type="proposition">Propositions</button>
+          <button class="filter-pill" data-type="corollary">Corollaries</button>
+          <button class="filter-pill" data-type="lemma">Lemmas</button>
+        </div>
+
+        <!-- Query Stats -->
+        <div class="search-stats" id="search-stats">
+          Loading search index...
+        </div>
+
+        <!-- Results Masonry Grid -->
+        <div class="search-results-grid" id="search-results"></div>
+      </div>
+    </main>
+
+    <script type="module" src="search.js"></script>
+  </body>
+</html>

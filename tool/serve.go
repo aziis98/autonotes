@@ -120,9 +120,21 @@ var ServeCmd = &cobra.Command{
 
 		// SSE Endpoint
 		mux.HandleFunc("/sse", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Printf("[SSE] Client connected from %s\n", r.RemoteAddr)
 			w.Header().Set("Content-Type", "text/event-stream")
 			w.Header().Set("Cache-Control", "no-cache")
 			w.Header().Set("Connection", "keep-alive")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+
+			flusher, ok := w.(http.Flusher)
+			if !ok {
+				http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+				return
+			}
+
+			// Send initial comment to establish the connection immediately
+			fmt.Fprintf(w, ": ok\n\n")
+			flusher.Flush()
 
 			client := make(chan bool)
 			clientsMu.Lock()
@@ -130,16 +142,31 @@ var ServeCmd = &cobra.Command{
 			clientsMu.Unlock()
 
 			defer func() {
+				fmt.Printf("[SSE] Client disconnected (remote %s)\n", r.RemoteAddr)
 				clientsMu.Lock()
 				delete(clients, client)
 				clientsMu.Unlock()
 			}()
 
+			ticker := time.NewTicker(5 * time.Second)
+			defer ticker.Stop()
+
 			for {
 				select {
 				case <-client:
-					fmt.Fprintf(w, "data: reload\n\n")
-					w.(http.Flusher).Flush()
+					_, err := fmt.Fprintf(w, "data: reload\n\n")
+					if err != nil {
+						fmt.Printf("[SSE] Write reload error (remote %s): %v\n", r.RemoteAddr, err)
+						return
+					}
+					flusher.Flush()
+				case <-ticker.C:
+					_, err := fmt.Fprintf(w, ": keepalive\n\n")
+					if err != nil {
+						fmt.Printf("[SSE] Write keepalive error (remote %s): %v\n", r.RemoteAddr, err)
+						return
+					}
+					flusher.Flush()
 				case <-r.Context().Done():
 					return
 				}
@@ -167,6 +194,9 @@ var ServeCmd = &cobra.Command{
       location.reload();
     }
   };
+  window.addEventListener('beforeunload', () => {
+    ev.close();
+  });
 </script>
 </body>`
 					html = strings.Replace(html, "</body>", script, 1)

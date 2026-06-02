@@ -187,13 +187,20 @@ func (c *ImageValidator) VisitBlock(n *BlockNode) {
 }
 
 type MathValidator struct {
-	path     string
-	warnings []string
+	path          string
+	warnings      []string
+	statementName string
 }
 
 func (v *MathValidator) VisitText(n *TextNode) {}
 
 func (v *MathValidator) VisitBlock(n *BlockNode) {
+	isStatement := n.Name == "theorem" || n.Name == "prop" || n.Name == "proposition" || n.Name == "lemma" || n.Name == "corollary"
+	oldStatementName := v.statementName
+	if isStatement {
+		v.statementName = n.Name
+	}
+
 	if n.Name == "reword" {
 		var sb strings.Builder
 		collectTextIgnoringMath(n, &sb)
@@ -210,10 +217,17 @@ func (v *MathValidator) VisitBlock(n *BlockNode) {
 				break
 			}
 		}
+
+		if v.statementName != "" {
+			if strings.Contains(strings.ToLower(text), "dimostrazione") {
+				v.warnings = append(v.warnings, fmt.Sprintf("%s: found 'dimostrazione' in <reword ref=\"%s\"> block inside <%s>", v.path, n.Attr("ref"), v.statementName))
+			}
+		}
 	}
 	for _, child := range n.Children {
 		child.Accept(v)
 	}
+	v.statementName = oldStatementName
 }
 
 func collectTextIgnoringMath(n Node, sb *strings.Builder) {

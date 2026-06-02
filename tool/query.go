@@ -161,6 +161,9 @@ func (e *TextExtractor) VisitText(n *TextNode) {
 }
 
 func (e *TextExtractor) VisitBlock(n *BlockNode) {
+	if n.Name == "box" {
+		return
+	}
 	for _, child := range n.Children {
 		child.Accept(e)
 	}
@@ -177,7 +180,7 @@ var querySummaryCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		notePath := args[0]
 		// We don't really care about the outPath here for debugging extraction
-		summary, err := processNoteFile(notePath, "/tmp/debug.html")
+		summary, _, _, err := processNoteFile(notePath, "/tmp/debug.html")
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)

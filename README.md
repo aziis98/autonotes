@@ -1,7 +1,7 @@
 # AutoNotes Project
 
 <p align="center">
-  <img src="docs/screenshot-1.png" alt="AutoNotes Screenshot" width="800">
+  <img src="docs/screenshot-1.png" alt="AutoNotes Screenshot" width="800" style="border: 2px solid #1a1a1a; box-shadow: 4px 4px 0px #000000;">
 </p>
 
 AutoNotes is a prototype of a **math handwritten notes OCR system** based purely on AI using multimodal models.
@@ -11,6 +11,19 @@ This project explores a workflow for automatically transcribing complex mathemat
 The result is an HTML visualization where everything is first transcribed as is and then _reworded_ by the LLM (keeping the thread of source boxes). Every theorem or definition is linked back to a specific region in the source image, ensuring you can always verify the output against your original notes.
 
 As models are also able to recognize math notation and figures in the image, we also get for free a tool that automatically inserts them in the transcribed text.
+
+## Interactive Fuzzy Search (New!)
+
+<img src="docs/new-search-page.png" alt="AutoNotes Search Page" width="320" align="right" style="margin-left: 20px; border: 2px solid #1a1a1a; box-shadow: 4px 4px 0px #000000;">
+
+AutoNotes now includes a robust **Fuzzy Search Dashboard** to locate definitions, theorems, propositions, corollaries, and lemmas instantly.
+
+- **Instant Matching**: Employs Fuse.js client-side to do fuzzy indexing across all notes, lesson titles, and courses.
+- **Math-Rich Previews**: Search results display fully rendered styled mathematics via MathJax inline rendering.
+- **Native Masonry Layout**: Styled using a high-fidelity CSS Grid Masonry layout (`display: grid-lanes;`) for optimized visual presentation.
+- **Direct Navigation**: Clicking on any card opens the corresponding lesson note and navigates directly to the specific target element.
+
+<br clear="right" />
 
 ## Agent-Assisted Transcription
 

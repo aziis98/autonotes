@@ -62,4 +62,9 @@ type LessonData struct {
 	Breadcrumbs   []Breadcrumb
 	Debug         bool
 	Summary       template.HTML
+	PrevPath      string
+	PrevTitle     string
+	NextPath      string
+	NextTitle     string
+	Tags          []string
 }

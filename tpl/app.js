@@ -129,8 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
   const toggle = document.getElementById("toggle-preview");
 
-  // Preview persistence
-  if (localStorage.getItem("preview-hidden") === "true") {
+  // Preview persistence (defaults to hidden)
+  if (localStorage.getItem("preview-hidden") !== "false") {
     body.classList.add("preview-hidden");
   }
 
@@ -200,15 +200,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.lucide) window.lucide.createIcons();
     }
 
-    const isHidden = localStorage.getItem("transcription-hidden") === "true";
+    const isHidden = localStorage.getItem("transcription-hidden") !== "false";
     if (isHidden) {
       body.classList.add("transcription-hidden");
     }
+    toggleTranscription.classList.toggle("active", !isHidden);
     updateTranscriptionIcon(isHidden);
 
     toggleTranscription.addEventListener("click", () => {
       const nowHidden = body.classList.toggle("transcription-hidden");
       localStorage.setItem("transcription-hidden", nowHidden);
+      toggleTranscription.classList.toggle("active", !nowHidden);
       updateTranscriptionIcon(nowHidden);
     });
   }

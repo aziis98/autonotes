@@ -2,6 +2,7 @@ package autonotes
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"image"
@@ -30,9 +31,11 @@ var BuildCmd = &cobra.Command{
 		copiedCount := 0
 		generatedCount := 0
 		summaries := make(map[string]template.HTML)
+		tagsMap := make(map[string][]string)
+		var allSearchEntries []SearchEntry
 
 		// Copy static assets from tpl/ to out/
-		staticAssets := []string{"styles.css", "app.js"}
+		staticAssets := []string{"styles.css", "app.js", "search.html", "search.js"}
 		for _, asset := range staticAssets {
 			content, err := os.ReadFile(filepath.Join("tpl", asset))
 			if err == nil {
@@ -54,12 +57,14 @@ var BuildCmd = &cobra.Command{
 			outPath := filepath.Join("out", relPath)
 			if strings.HasSuffix(path, ".note") {
 				outPath = strings.TrimSuffix(outPath, ".note") + ".html"
-				summary, err := processNoteFile(path, outPath)
+				summary, tags, entries, err := processNoteFile(path, outPath)
 				if err != nil {
 					fmt.Printf("Error processing %s: %v\n", path, err)
 				} else {
 					builtCount++
 					summaries[outPath] = summary
+					tagsMap[outPath] = tags
+					allSearchEntries = append(allSearchEntries, entries...)
 				}
 			} else {
 				ext := strings.ToLower(filepath.Ext(path))
@@ -104,6 +109,23 @@ var BuildCmd = &cobra.Command{
 			fmt.Println("Error:", err)
 		}
 
+		// Write search index
+		if err := os.MkdirAll(filepath.Join("out", "data"), 0755); err != nil {
+			fmt.Printf("Error creating out/data directory: %v\n", err)
+		} else {
+			jsonData, err := json.MarshalIndent(allSearchEntries, "", "  ")
+			if err != nil {
+				fmt.Printf("Error marshaling search entries: %v\n", err)
+			} else {
+				err = os.WriteFile(filepath.Join("out", "data", "search.json"), jsonData, 0644)
+				if err != nil {
+					fmt.Printf("Error writing search.json: %v\n", err)
+				} else {
+					fmt.Printf("Generated out/data/search.json with %d entries\n", len(allSearchEntries))
+				}
+			}
+		}
+
 		// Generate index.html for each directory using the new template
 		filepath.WalkDir("out", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
@@ -116,6 +138,7 @@ var BuildCmd = &cobra.Command{
 					Link    string
 					IsDir   bool
 					Summary template.HTML
+					Tags    []string
 				}
 				var dashboardEntries []Entry
 
@@ -125,11 +148,19 @@ var BuildCmd = &cobra.Command{
 					if e.Name() == "index.html" || e.Name() == "styles.css" || e.Name() == "app.js" {
 						continue
 					}
-					link := e.Name()
-					name := e.Name()
-					if e.IsDir() {
-						link += "/"
+					var link string
+					if rel == "." {
+						link = "/" + e.Name()
 					} else {
+						link = "/" + filepath.ToSlash(filepath.Join(rel, e.Name()))
+					}
+					if e.IsDir() {
+						if !strings.HasSuffix(link, "/") {
+							link += "/"
+						}
+					}
+					name := e.Name()
+					if !e.IsDir() {
 						name = strings.TrimSuffix(name, ".html")
 					}
 					key := filepath.Join(path, e.Name())
@@ -138,6 +169,7 @@ var BuildCmd = &cobra.Command{
 						Link:    link,
 						IsDir:   e.IsDir(),
 						Summary: summaries[key],
+						Tags:    tagsMap[key],
 					})
 				}
 
@@ -182,21 +214,21 @@ var BuildCmd = &cobra.Command{
 	},
 }
 
-func processNoteFile(notePath, outPath string) (template.HTML, error) {
+func processNoteFile(notePath, outPath string) (template.HTML, []string, []SearchEntry, error) {
 	content, err := os.ReadFile(notePath)
 	if err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 
 	p := NewParser(string(content))
 	ast, err := p.Parse()
 	if err != nil {
-		return "", fmt.Errorf("parsing error: %w", err)
+		return "", nil, nil, fmt.Errorf("parsing error: %w", err)
 	}
 
 	outDir := filepath.Dir(outPath)
 	if err := os.MkdirAll(outDir, 0755); err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 
 	relToOut, _ := filepath.Rel("out", outPath)
@@ -205,16 +237,32 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 		absDir = "/" + filepath.ToSlash(filepath.Dir(relToOut)) + "/"
 	}
 
-	renderer := &HTMLRenderer{absDir: absDir}
-	ast.Accept(renderer)
-	htmlContent := renderer.String()
-
 	// Check if <lesson> is present
 	root, _ := ast.(*BlockNode)
 	lessonNode := root.FindChild("lesson")
 	if lessonNode == nil {
-		return "", fmt.Errorf("missing <lesson> tag in %s", notePath)
+		return "", nil, nil, fmt.Errorf("missing <lesson> tag in %s", notePath)
 	}
+
+	tagsAttr := lessonNode.Attr("tags")
+	var tags []string
+	if tagsAttr != "" {
+		tags = strings.Fields(tagsAttr)
+	}
+
+	fileSlug := strings.TrimSuffix(filepath.Base(notePath), ".note")
+	relPath, _ := filepath.Rel("src", notePath)
+	relHtmlPath := strings.TrimSuffix(relPath, ".note") + ".html"
+	lessonLink := "/" + filepath.ToSlash(relHtmlPath)
+	course := lessonNode.Attr("course")
+	date := lessonNode.Attr("date")
+
+	counter := 1
+	searchEntries := collectSearchEntries(ast, fileSlug, lessonLink, course, date, absDir, &counter)
+
+	renderer := &HTMLRenderer{absDir: absDir}
+	ast.Accept(renderer)
+	htmlContent := renderer.String()
 
 	// Extract summary if present
 	summary := template.HTML("")
@@ -259,14 +307,45 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 	}
 	breadcrumbs = append(breadcrumbs, Breadcrumb{Name: title, Link: ""})
 
+	var prevPath, prevTitle, nextPath, nextTitle string
+	dirEntries, readErr := os.ReadDir(filepath.Dir(notePath))
+	if readErr == nil {
+		var noteFiles []string
+		for _, e := range dirEntries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".note") {
+				noteFiles = append(noteFiles, e.Name())
+			}
+		}
+
+		currentIndex := -1
+		currentBase := filepath.Base(notePath)
+		for i, f := range noteFiles {
+			if f == currentBase {
+				currentIndex = i
+				break
+			}
+		}
+
+		if currentIndex > 0 {
+			prevNote := noteFiles[currentIndex-1]
+			prevTitle = strings.TrimSuffix(prevNote, ".note")
+			prevPath = prevTitle + ".html"
+		}
+		if currentIndex >= 0 && currentIndex < len(noteFiles)-1 {
+			nextNote := noteFiles[currentIndex+1]
+			nextTitle = strings.TrimSuffix(nextNote, ".note")
+			nextPath = nextTitle + ".html"
+		}
+	}
+
 	tplContent, err := os.ReadFile("tpl/lesson.html")
 	if err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 
 	tpl, err := template.New("lesson").Parse(string(tplContent))
 	if err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 
 	var buf bytes.Buffer
@@ -278,12 +357,17 @@ func processNoteFile(notePath, outPath string) (template.HTML, error) {
 		Breadcrumbs:   breadcrumbs,
 		Debug:         DebugMode,
 		Summary:       summary,
+		PrevPath:      prevPath,
+		PrevTitle:     prevTitle,
+		NextPath:      nextPath,
+		NextTitle:     nextTitle,
+		Tags:          tags,
 	})
 	if err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 
-	return summary, os.WriteFile(outPath, buf.Bytes(), 0644)
+	return summary, tags, searchEntries, os.WriteFile(outPath, buf.Bytes(), 0644)
 }
 
 func expandCompactRefs(input string) string {
@@ -406,7 +490,11 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 	} else if n.Name == "summary" {
 		fmt.Fprintf(&r.sb, `<div class="summary-block hidden">`)
 	} else if isTheorem {
-		fmt.Fprintf(&r.sb, `<div class="%s">`, n.Name)
+		idAttr := ""
+		if idVal := n.Attr("id"); idVal != "" {
+			idAttr = fmt.Sprintf(` id="%s"`, template.HTMLEscapeString(idVal))
+		}
+		fmt.Fprintf(&r.sb, `<div class="%s"%s>`, n.Name, idAttr)
 	} else if n.Name == "itemize" {
 		fmt.Fprintf(&r.sb, `<ul class="list-disc pl-8 my-2">`)
 	} else if n.Name == "enumerate" {
@@ -558,4 +646,78 @@ func processImage(srcPath, dstPath string) error {
 	defer out.Close()
 
 	return jpeg.Encode(out, img, &jpeg.Options{Quality: 85})
+}
+
+type SearchEntry struct {
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	LessonTitle string `json:"lessonTitle"`
+	LessonLink  string `json:"lessonLink"`
+	Course      string `json:"course"`
+	Date        string `json:"date"`
+	ContentText string `json:"contentText"`
+	ContentHTML string `json:"contentHtml"`
+}
+
+func collectSearchEntries(node Node, fileSlug string, lessonLink string, course string, date string, absDir string, counter *int) []SearchEntry {
+	block, ok := node.(*BlockNode)
+	if !ok {
+		return nil
+	}
+
+	var entries []SearchEntry
+
+	isSearchable := block.Name == "theorem" || block.Name == "lemma" || block.Name == "definition" || block.Name == "proposition" || block.Name == "corollary"
+	if isSearchable {
+		// Assign ID
+		uid := block.Attr("id")
+		if uid == "" {
+			uid = block.Attr("uid")
+		}
+		// If not found, look for first box with a uid
+		if uid == "" {
+			for _, child := range block.Children {
+				if cb, ok := child.(*BlockNode); ok && cb.Name == "box" {
+					if buid := cb.Attr("uid"); buid != "" {
+						uid = strings.TrimSuffix(buid, "-box")
+						break
+					}
+				}
+			}
+		}
+		// Fallback to sequential ID
+		if uid == "" {
+			uid = fmt.Sprintf("%s-%d", block.Name, *counter)
+			*counter++
+		}
+		block.Attributes["id"] = uid
+
+		// Extract plain text for searching
+		extractor := &TextExtractor{}
+		block.Accept(extractor)
+		contentText := strings.TrimSpace(extractor.String())
+
+		// Render HTML for display
+		renderer := &HTMLRenderer{absDir: absDir}
+		block.Accept(renderer)
+		contentHTML := renderer.String()
+
+		entries = append(entries, SearchEntry{
+			ID:          uid,
+			Type:        block.Name,
+			LessonTitle: fileSlug,
+			LessonLink:  lessonLink + "#" + uid,
+			Course:      course,
+			Date:        date,
+			ContentText: contentText,
+			ContentHTML: contentHTML,
+		})
+	}
+
+	for _, child := range block.Children {
+		childEntries := collectSearchEntries(child, fileSlug, lessonLink, course, date, absDir, counter)
+		entries = append(entries, childEntries...)
+	}
+
+	return entries
 }
