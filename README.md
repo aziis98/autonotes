@@ -130,7 +130,9 @@ The `converter` tool provides several subcommands for managing the transcription
   - `-s, --select <types>`: Filter by block types (e.g., `theorem,definition`).
   - `-g, --grep <pattern>`: Search for text within blocks.
   - `-e, --extract <types>`: Extract specific child blocks (e.g., `reword`).
+  - `-v, --verbose`: Enable verbose logging to stderr.
   - `query summary <path>`: Extract the lesson summary from a specific file.
+  - `query histogram [subfolder]`: Print counts for all found tag types (optionally filtered by subfolder).
 
 ## Usage
 
@@ -146,18 +148,31 @@ And then use other commands like `status` or `query` in another terminal to find
 
 Note files use an XML-like syntax to map transcriptions to images using a **1000x1000 coordinate system**.
 
+### Root & Document Structure
+
+- `<lesson date="YYYY-MM-DD" course="Course Name">`: The root wrapper for every note file.
+- `<summary>`: The first element inside `<lesson>`, containing a short and concise summary of the lesson (renders as the card description on the dashboard).
+- `<section title="Section Title">`: Standard heading block used to divide note files into sections.
+
 ### Base Elements
 
-- `<box image="name.jpg" top="Y" right="X" bottom="Y" left="X">`: Maps transcribed text to a region on an image. Triggers a red highlight and lens view on hover.
-- `<math>` and `<math display="true">`: KaTeX-powered mathematical expressions.
-- `<reword>`: Formal textbook-style rewrite of the transcription.
+- `<box image="name.jpg" top="Y" right="X" bottom="Y" left="X" uid="unique-id">`: Maps transcribed text to a region on an image. Triggers a red highlight and lens view on hover. Must include a unique `uid`.
+- `<math>` and `<math display="true">`: KaTeX-powered mathematical expressions (inline or display block).
+- `<reword ref="box-uid">`: Formal textbook-style rewrite of the transcription. The `ref` attribute links it back to one or more `<box>` elements (supports bracket group syntax like `ref="subgroup-[thm,dim]"`).
 - `<image src="name.jpg" top="..." right="..." bottom="..." left="..." />`: Inline cropped diagram. Also supports hover highlighting and lens view.
-- `<spoiler>`: Collapsible element to hide details. Requires exactly two children: `<preview>` (visible text) and `<content>` (hidden content).
+- `<spoiler>`: Collapsible element to hide details. Requires exactly two children: `<preview>` (visible text) and `<content>` (hidden details).
 
 ### Structural Blocks
 
-- `<definition>`, `<theorem>`, `<lemma>`, `<oss>`, `<dim>`, `<richiami>`: Semantic containers for mathematical content.
-- `<itemize>`, `<enumerate>`, `<item>`: Support for bulleted and numbered lists.
+- `<definition>`, `<theorem>`, `<lemma>`, `<proposition>`, `<corollary>`, `<exercise>`, `<fact>`: Semantic boxes for theorems, statements, and observations (fact is used for osservazioni). Renders with specific background colors.
+- `<dim>`, `<richiami>`: Semantic blocks for proofs (dimostrazioni) and recalls (richiami).
+- `<itemize>`, `<enumerate>`, `<item>`: Bulleted and numbered lists.
+
+### Inline Formatting
+
+- `<strong>...</strong>`: Renders text in bold.
+- `<emph>...</emph>`: Renders text in italics/emphasis.
+- `<a href="...">...</a>`: Creates hyperlink cross-references between notes.
 
 ## TODO
 
