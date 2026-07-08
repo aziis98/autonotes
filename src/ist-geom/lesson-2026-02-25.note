@@ -1,4 +1,4 @@
-<lesson date="2026-02-25" course="Istituzioni di Geometria">
+<lesson date="2026-02-25" course="Istituzioni di Geometria" tags="reviewed">
   <summary>
     Fondamenti delle <strong>varietà lisce</strong>: definizioni, atlanti e mappe di transizione. Costruzione di strutture differenziabili su spazi topologici ed esempi fondamentali tra cui la <strong>sfera</strong> <math>\mathbb{S}^n</math>, lo <strong>spazio proiettivo</strong> <math>\mathbb{P}^n</math> e la <strong>Grassmanniana</strong> <math>Gr_k(V)</math>.
   </summary>
@@ -13,11 +13,10 @@
 </box>
 
 <reword ref="page-003-[title,intro]">
-  <strong>Lezione 1 (25/02/2026).</strong>
-  <strong>Istituzioni di Geometria - 2026.</strong>
-  L'obiettivo del corso è lo studio delle varietà, con particolare attenzione alle applicazioni nella relatività generale. Il ricevimento si tiene il mercoledì alle 14:30.
+  L'obiettivo del corso è lo studio delle varietà fino ad arrivare alle <strong>varietà Riemanniane</strong> e <strong>varietà Lorentziane</strong>, con applicazioni alla relatività generale.
 </reword>
 
+<section title="Introduzione alle Varietà">
 <definition>
   <box uid="page-003-def1" image="page-003.png" top=135 right=640 bottom=225 left=20>
     DEF1: Una n-VARIETA` TOP. e` uno sp. top. X, hausdorff, a base numerabile, localmente omeom. a R^n.
@@ -25,7 +24,7 @@
     qlss. e` loro unione
   </box>
   <reword ref="page-003-def1">
-    <strong>Definizione (Varietà topologica).</strong> Una <strong><math>n</math>-varietà topologica</strong> è uno spazio topologico <math>X</math> che sia di Hausdorff, a base numerabile e localmente omeomorfo a <math>\mathbb{R}^n</math>. Questo significa che per ogni punto <math>x \in X</math> esiste un intorno aperto <math>U(x)</math> omeomorfo a un aperto di <math>\mathbb{R}^n</math>.
+    <strong>Definizione.</strong> Una <strong><math>n</math>-varietà topologica</strong> è uno spazio topologico <math>X</math> che sia di Hausdorff, a base numerabile e localmente omeomorfo a <math>\mathbb{R}^n</math>. Questo significa che per ogni punto <math>x \in X</math> esiste un intorno aperto <math>U(x)</math> omeomorfo a un aperto di <math>\mathbb{R}^n</math>.
   </reword>
 </definition>
 
@@ -44,7 +43,7 @@
     e.g. imm. di mappe fatte bene...
   </box>
   <reword ref="page-003-def2">
-    <strong>Definizione (Varietà come sottoinsieme di <math>\mathbb{R}^N</math>).</strong> Una <math>n</math>-varietà può essere definita come un sottoinsieme <math>S \subseteq \mathbb{R}^N</math> (con <math>N \ge n</math>) che sia localmente l'immagine di "buone" applicazioni (ossia immersioni o parametrizzazioni locali).
+    <strong>Definizione.</strong> Una <strong><math>n</math>-varietà</strong> può essere definita come un sottoinsieme <math>S \subseteq \mathbb{R}^N</math> (con <math>N \ge n</math>) che sia localmente l'immagine di "buone" applicazioni (ossia immersioni o parametrizzazioni locali).
   </reword>
 </definition>
 
@@ -62,7 +61,7 @@
     DEF3: M n-varieta` topologica. Una CARTA e` un omeom. φ: U → V con U ⊆ M e V ⊆ R^n aperto.
   </box>
   <reword ref="page-003-def3">
-    <strong>Definizione (Carta).</strong> Sia <math>M</math> una <math>n</math>-varietà topologica. Una <strong>carta</strong> su <math>M</math> è un omeomorfismo <math>\varphi \colon U \to V</math>, dove <math>U \subseteq M</math> è un aperto e <math>V \subseteq \mathbb{R}^n</math> è un aperto.
+    <strong>Definizione.</strong> Sia <math>M</math> una <math>n</math>-varietà topologica. Una <strong>carta</strong> su <math>M</math> è un omeomorfismo <math>\varphi \colon U \to V</math>, dove <math>U \subseteq M</math> è un aperto e <math>V \subseteq \mathbb{R}^n</math> è un aperto.
   </reword>
 </definition>
 
@@ -71,7 +70,7 @@
     Un ATLANTE A = {φ_i: U_i → V_i}_{i ∈ I} insieme di carte tc. ∪_{i ∈ I} U_i = M.
   </box>
   <reword ref="page-003-atlante">
-    <strong>Definizione (Atlante).</strong> Un <strong>atlante</strong> <math>\mathcal{A} = \{ (U_i, \varphi_i) \}_{i \in I}</math> su <math>M</math> è una famiglia di carte tale che gli intorni <math>U_i</math> ricoprano interamente <math>M</math>, ossia <math>\bigcup_{i \in I} U_i = M</math>.
+    <strong>Definizione.</strong> Un <strong>atlante</strong> <math>\mathcal{A} = \{ (U_i, \varphi_i) \}_{i \in I}</math> su <math>M</math> è una famiglia di carte tale che gli intorni <math>U_i</math> ricoprano interamente <math>M</math>, ossia <math>\bigcup_{i \in I} U_i = M</math>.
   </reword>
 </definition>
 
@@ -79,9 +78,9 @@
   <box uid="page-003-transizione" image="page-003.png" top=575 right=640 bottom=650 left=20>
     Dato un atlante A, se U_i ∩ U_j ≠ ∅ otteniamo una MAPPA DI TRANSIZIONE φ_{ij}: φ_i(U_i ∩ U_j) → φ_j(U_i ∩ U_j)
   </box>
-  <image src="page-003.jpg" top=638 right=510 bottom=820 left=80 />
+  <image uid="page-003-img-transizione" src="page-003.png" top=638 right=510 bottom=820 left=80 />
   <reword ref="page-003-[transizione,img-transizione]">
-    <strong>Definizione (Mappa di transizione).</strong> Siano <math>(U_i, \varphi_i)</math> e <math>(U_j, \varphi_j)</math> due carte di un atlante tali che <math>U_i \cap U_j \neq \emptyset</math>. La <strong>mappa di transizione</strong> (o cambiamento di coordinate) è l'applicazione <math>\varphi_{ij} = \varphi_j \circ \varphi_i^{-1}</math> definita dall'insieme <math>\varphi_i(U_i \cap U_j)</math> all'insieme <math>\varphi_j(U_i \cap U_j)</math>. Queste mappe sono omeomorfismi tra aperti di <math>\mathbb{R}^n</math>.
+    <strong>Definizione.</strong> Siano <math>(U_i, \varphi_i)</math> e <math>(U_j, \varphi_j)</math> due carte di un atlante tali che <math>U_i \cap U_j \neq \emptyset</math>. La <strong>mappa di transizione</strong> (o cambiamento di coordinate) è l'applicazione <math>\varphi_{ij} = \varphi_j \circ \varphi_i^{-1}</math> definita dall'insieme <math>\varphi_i(U_i \cap U_j)</math> all'insieme <math>\varphi_j(U_i \cap U_j)</math>. Queste mappe sono omeomorfismi tra aperti di <math>\mathbb{R}^n</math>.
   </reword>
 </definition>
 
@@ -90,7 +89,7 @@
     L'atlante A e` LISCIO se ogni φ_{ij} e` liscia, cioe` C^∞.
   </box>
   <reword ref="page-003-liscio">
-    <strong>Definizione (Atlante liscio).</strong> Un atlante <math>\mathcal{A}</math> si dice <strong>liscio</strong> (o di classe <math>C^\infty</math>) se tutte le sue mappe di transizione sono applicazioni lisce.
+    <strong>Definizione.</strong> Un atlante <math>\mathcal{A}</math> si dice <strong>liscio</strong> (o di classe <math>C^\infty</math>) se tutte le sue mappe di transizione sono applicazioni lisce.
   </reword>
 </definition>
 
@@ -99,7 +98,7 @@
     Def: Due atlanti lisci A, A' sono COMPATIBILI se A ∪ A' e` ancora un atlante liscio.
   </box>
   <reword ref="page-003-compatibili">
-    <strong>Definizione (Atlanti compatibili).</strong> Due atlanti lisci <math>\mathcal{A}</math> e <math>\mathcal{A}'</math> si dicono <strong>compatibili</strong> se la loro unione <math>\mathcal{A} \cup \mathcal{A}'</math> è ancora un atlante liscio (ossia se i cambiamenti di coordinate tra carte di <math>\mathcal{A}</math> e carte di <math>\mathcal{A}'</math> sono lisci).
+    <strong>Definizione.</strong> Due atlanti lisci <math>\mathcal{A}</math> e <math>\mathcal{A}'</math> si dicono <strong>compatibili</strong> se la loro unione <math>\mathcal{A} \cup \mathcal{A}'</math> è ancora un atlante liscio (ossia se i cambiamenti di coordinate tra carte di <math>\mathcal{A}</math> e carte di <math>\mathcal{A}'</math> sono lisci).
   </reword>
 </definition>
 
@@ -108,7 +107,7 @@
     Un atlante e` MASSIMALE, se contiene tutti gli atlanti compatibili con lui.
   </box>
   <reword ref="page-003-massimale">
-    <strong>Definizione (Atlante massimale).</strong> Un atlante liscio si dice <strong>massimale</strong> se contiene ogni altra carta compatibile con esso. Un atlante massimale definisce una <strong>struttura liscia</strong> sulla varietà.
+    <strong>Definizione.</strong> Un atlante liscio si dice <strong>massimale</strong> se contiene ogni altra carta compatibile con esso. Un atlante massimale definisce una <strong>struttura liscia</strong> sulla varietà.
   </reword>
 </definition>
 
@@ -126,7 +125,7 @@
     Def: Una STRUTTURA LISCIA su una n-varieta` top. M e` un atlante liscio massimale per M.
   </box>
   <reword ref="page-004-def-struttura">
-    <strong>Definizione (Struttura liscia).</strong> Una <strong>struttura liscia</strong> su una varietà topologica <math>M</math> è la scelta di un un atlante liscio massimale.
+    <strong>Definizione.</strong> Una <strong>struttura liscia</strong> su una varietà topologica <math>M</math> è la scelta di un un atlante liscio massimale.
   </reword>
 </definition>
 
@@ -153,7 +152,7 @@
     Def: Una VARIETA` LISCIA e` una varieta` top. munita di struttura liscia.
   </box>
   <reword ref="page-004-def-var-liscia">
-    <strong>Definizione (Varietà liscia).</strong> Una <strong>varietà liscia</strong> è una varietà topologica dotata di una struttura liscia.
+    <strong>Definizione.</strong> Una <strong>varietà liscia</strong> è una varietà topologica dotata di una struttura liscia.
   </reword>
 </definition>
 
@@ -191,7 +190,7 @@
     (y^1, ..., y^n) ↦ (y^1, ..., y^{i-1}, ± \sqrt{1 - ||y||^2}, y^{i+1}, ..., y^n)
   </box>
   <reword ref="page-004-sfera-carte">
-    Questi aperti ricoprono <math>S^n</math>. Le carte <strong>proiezioni coordinate</strong> sono definite da <math>\varphi_i^\pm \colon U_i^\pm \to B^n</math>, dove <math>B^n</math> è la palla unitaria in <math>\mathbb{R}^n</math>, tramite la proiezione che omette l'i-esima coordinata:
+    <strong>Definizione.</strong> Questi aperti ricoprono <math>S^n</math>. Le carte <strong>proiezioni coordinate</strong> sono definite da <math>\varphi_i^\pm \colon U_i^\pm \to B^n</math>, dove <math>B^n</math> è la palla unitaria in <math>\mathbb{R}^n</math>, tramite la proiezione che omette l'i-esima coordinata:
     <math display="true">
       \varphi_i^\pm(x^1, \dots, x^{n+1}) = (x^1, \dots, \hat{x}^i, \dots, x^{n+1})
     </math>
@@ -212,7 +211,7 @@
     => A' := { φ_N, φ_S } e` liscio.
     A e A' sono compat. => definiscono la stessa struttura differenziabile su S^n.
   </box>
-  <image src="page-005.jpg" uid="page-005-img-stereografica" top=92 right=299 bottom=204 left=0 />
+  <image src="page-005.png" uid="page-005-img-stereografica" top=92 right=299 bottom=204 left=0 />
   <reword ref="page-005-[costruzione-alternativa,img-stereografica]">
     <strong>Costruzione alternativa (Proiezione stereografica).</strong> È possibile definire un atlante per <math>S^n</math> composto da sole due carte: la proiezione stereografica dal polo nord <math>N</math> e quella dal polo sud <math>S</math>. L'atlante <math>\mathcal{A}' = \{ (S^n \setminus \{ N \}, \varphi_N), (S^n \setminus \{ S \}, \varphi_S) \}</math> è liscio e risulta compatibile con l'atlante delle proiezioni coordinate <math>\mathcal{A}</math>, definendo così la medesima struttura differenziabile.
   </reword>
@@ -234,7 +233,7 @@
     Ex: RP^n, CP^n sono varieta` top. di dim. n, 2n connesse e compatte.
   </box>
   <reword ref="page-005-def-kp-n">
-    <strong>Definizione (Spazio proiettivo reale/complesso).</strong> Si definisce <strong><math>\mathbb{K}\mathbb{P}^n</math></strong> come <math>\mathbb{P}(\mathbb{K}^{n+1})</math>. Si tratta di una varietà topologica di dimensione reale <math>n</math> (se <math>\mathbb{K} = \mathbb{R}</math>) o <math>2n</math> (se <math>\mathbb{K} = \mathbb{C}</math>). Tali spazi sono connessi e compatti.
+    <strong>Definizione.</strong> Si definisce <strong><math>\mathbb{K}\mathbb{P}^n</math></strong> come <math>\mathbb{P}(\mathbb{K}^{n+1})</math>. Si tratta di una varietà topologica di dimensione reale <math>n</math> (se <math>\mathbb{K} = \mathbb{R}</math>) o <math>2n</math> (se <math>\mathbb{K} = \mathbb{C}</math>). Tali spazi sono connessi e compatti.
   </reword>
 </definition>
 
@@ -251,7 +250,7 @@
     A = { φ_i : U_i → R^n } atlante liscio.
   </box>
   <reword ref="page-005-kp-n-atlante">
-    Indichiamo con <math>[x_1, \dots, x_{n+1}]</math> le coordinate omogenee di un punto in <math>\mathbb{K}\mathbb{P}^n</math>. Definiamo gli aperti <math>U_i = \{ [x_1, \dots, x_{n+1}] \in \mathbb{K}\mathbb{P}^n \mid x_i \neq \emptyset \}</math>. Su ciascun <math>U_i</math> definiamo la carta <math>\varphi_i \colon U_i \to \mathbb{K}^n</math> tramite divisione per l'i-esima coordinata:
+    <strong>Definizione.</strong> Indichiamo con <math>[x_1, \dots, x_{n+1}]</math> le <strong>coordinate omogenee</strong> di un punto in <math>\mathbb{K}\mathbb{P}^n</math>. Definiamo gli aperti <math>U_i = \{ [x_1, \dots, x_{n+1}] \in \mathbb{K}\mathbb{P}^n \mid x_i \neq \emptyset \}</math>. Su ciascun <math>U_i</math> definiamo la carta <math>\varphi_i \colon U_i \to \mathbb{K}^n</math> tramite divisione per l'i-esima coordinata:
     <math display="true">
       \varphi_i([x_1, \dots, x_{n+1}]) = \left( \frac{x_1}{x_i}, \dots, \frac{x_{i-1}}{x_i}, \frac{x_{i+1}}{x_i}, \dots, \frac{x_{n+1}}{x_i} \right)
     </math>
@@ -263,7 +262,7 @@
   </reword>
 </definition>
 
-<oss>
+<definition>
   <box uid="page-006-no-prior-topology" image="page-006.png" top=15 right=600 bottom=300 left=20>
     No prior topology: sia X un insieme
     Def: Una CARTA e` φ_i : U_i → V_i biunivoca tra U_i ⊆ X sottoins. e V_i ⊆ R^n aperto.
@@ -273,33 +272,33 @@
     -) φ_{ij} e` liscia.
   </box>
   <reword ref="page-006-no-prior-topology">
-    <strong>Nota (Definizione di struttura liscia senza topologia preesistente).</strong> È possibile definire una struttura liscia su un insieme <math>X</math> privo di topologia. Una carta è una funzione biunivoca <math>\varphi_i \colon U_i \to V_i</math> tra un sottoinsieme <math>U_i \subseteq X</math> e un aperto <math>V_i \subseteq \mathbb{R}^n</math>. Un atlante <math>\mathcal{A} = \{ (U_i, \varphi_i) \}</math> ricopre <math>X</math>. Tale atlante si dice liscio se, per ogni intersezione non vuota, gli insiemi <math>\varphi_i(U_i \cap U_j)</math> sono aperti e le mappe di transizione sono lisce.
+    <strong>Definizione (No prior topology).</strong> È possibile definire una <strong>struttura liscia su un insieme <math>X</math></strong> privo di topologia. Una <emph>carta</emph> è una funzione biunivoca <math>\varphi_i \colon U_i \to V_i</math> tra un sottoinsieme <math>U_i \subseteq X</math> e un aperto <math>V_i \subseteq \mathbb{R}^n</math>. Un <emph>atlante</emph> <math>\mathcal{A} = \{ (U_i, \varphi_i) \}</math> ricopre <math>X</math>. Tale atlante si dice <emph>liscio</emph> se, per ogni intersezione non vuota, gli insiemi <math>\varphi_i(U_i \cap U_j)</math> sono aperti e le mappe di transizione sono lisce.
   </reword>
-</oss>
 
-<oss>
   <box uid="page-006-topologia-indotta" image="page-006.png" top=310 right=600 bottom=450 left=20>
     Sia A un atlante liscio su X, definisco su X la top. piu` debole che rende le φ_i continue.
     Concretamente: U ⊆ X e` aperto sse φ_i(U ∩ U_i) aperto in R^n ∀i.
     Ex: Se X e` hausdorff e a base num. e` una varieta` top., con una struttura liscia data da A.
   </box>
   <reword ref="page-006-topologia-indotta">
-    Dato un tale atlante liscio su <math>X</math>, si definisce su <math>X</math> la topologia più debole che renda continue tutte le carte <math>\varphi_i</math>. In questa topologia, un insieme <math>U \subseteq X</math> è aperto se e solo se tutte le sue immagini <math>\varphi_i(U \cap U_i)</math> sono aperte in <math>\mathbb{R}^n</math>. Se lo spazio <math>X</math> con questa topologia risulta di Hausdorff e a base numerabile, allora <math>X</math> è una varietà liscia.
+    Dato un tale atlante liscio su <math>X</math>, si definisce su <math>X</math> la <strong>topologia indotta</strong> (la topologia più debole che renda continue tutte le carte <math>\varphi_i</math>). In questa topologia, un insieme <math>U \subseteq X</math> è aperto se e solo se tutte le sue immagini <math>\varphi_i(U \cap U_i)</math> sono aperte in <math>\mathbb{R}^n</math>. Se lo spazio <math>X</math> con questa topologia risulta di Hausdorff e a base numerabile, allora <math>X</math> è una <strong>varietà liscia</strong>.
   </reword>
-</oss>
+</definition>
 
-<example>
+<definition>
   <box uid="page-006-es5-grassmanniane" image="page-006.png" top=470 right=650 bottom=650 left=20>
     5) GRASSMANNIANE. V sp. vett. su K = R o C con dim V = n. 1 ≤ k < n
     Gr_k(V) = { k-sp. vett. di V }
     Gr_1(V) = P(V) (Sono una generalizzazione del proiettivo)
   </box>
   <reword ref="page-006-es5-grassmanniane">
-    <strong>Esempio 5 (Grassmanniane).</strong> Sia <math>V</math> uno spazio vettoriale di dimensione <math>n</math>. Per <math>1 \le k < n</math>, la <strong>Grassmanniana</strong> <math>Gr_k(V)</math> è l'insieme di tutti i sottospazi vettoriali di <math>V</math> di dimensione <math>k</math>. Si noti che <math>Gr_1(V)</math> coincide con lo spazio proiettivo <math>\mathbb{P}(V)</math>.
+    <strong>Definizione.</strong> Sia <math>V</math> uno spazio vettoriale di dimensione <math>n</math>. Per <math>1 \le k < n</math>, la <strong>Grassmanniana</strong> è definita come:
+    <math display="true">Gr_k(V) \coloneqq \{ W \subseteq V \mid \dim(W) = k \}</math>
+    Si noti che <math>Gr_1(V)</math> coincide con lo spazio proiettivo <math>\mathbb{P}(V)</math>.
   </reword>
-</example>
+</definition>
 
-<definition>
+<dim>
   <box uid="page-006-grassmanniana-atlante" image="page-006.png" top=665 right=650 bottom=985 left=20>
     Definiamo direttamente un atlante (che ci dara` anche la topologia).
     Prendiamo B = { v_1, ..., v_n } base di V
@@ -308,29 +307,44 @@
     U_B = { W' ∈ Gr_k(V) tc. W' ⊕ Z = V } ∋ W
   </box>
   <reword ref="page-006-grassmanniana-atlante">
-    Per definire la struttura di varietà sulla Grassmanniana, fissiamo una base <math>\mathcal{B} = \{ v_1, \dots, v_n \}</math> di <math>V</math>. Siano <math>W = \textrm{span}\{v_1, \dots, v_k\}</math> e <math>Z = \textrm{span}\{v_{k+1}, \dots, v_n\}</math>, cosicché <math>V = W \oplus Z</math>. Definiamo l'intorno <math>U_\mathcal{B} \subseteq Gr_k(V)</math> come l'insieme dei sottospazi <math>W'</math> di dimensione <math>k</math> che sono in somma diretta con <math>Z</math>. Chiaramente <math>W \in U_\mathcal{B}</math>.
+    <strong>Dimostrazione.</strong> Definiamo direttamente un atlante (che ci darà anche la topologia). Fissata una base <math>\mathcal{B} = \{ v_1, \dots, v_n \}</math> di <math>V</math>, poniamo:
+    <math display="true">W \coloneqq \mathrm{span}\{v_1, \dots, v_k\}, \quad Z \coloneqq \mathrm{span}\{v_{k+1}, \dots, v_n\}</math>
+    in modo da avere la decomposizione in somma diretta <math>V = W \oplus Z</math>. Definiamo quindi l'intorno <strong><math>U_\mathcal{B}</math></strong> come l'insieme:
+    <math display="true">U_\mathcal{B} \coloneqq \{ W' \in Gr_k(V) \mid W' \oplus Z = V \} \ni W</math>
   </reword>
-</definition>
 
-<definition>
   <box uid="page-007-grassmanniana-mappa" image="page-007.png" top=15 right=650 bottom=130 left=20>
     Z x ... x Z (k volte) -F-> U_B. (Ex. e` biunivoca)
     (z_1, ..., z_k) ↦ span { v_1 + z_1, ..., v_k + z_k }
     U_B -F-> Z^k → (R^{n-k})^k = R^{k(n-k)}
   </box>
   <reword ref="page-007-grassmanniana-mappa">
-    Definiamo una mappa <math>F \colon Z^k \to U_\mathcal{B}</math> mandando una <math>k</math>-upla di vettori <math>(z_1, \dots, z_k)</math> in <math>Z</math> nel sottospazio generato dai vettori <math>v_i + z_i</math>. Si può dimostrare che <math>F</math> è biunivoca. La carta <math>\varphi_\mathcal{B}</math> è quindi definita come l'inversa di <math>F</math>, la quale mappa ogni sottospazio <math>W' \in U_\mathcal{B}</math> in uno spazio euclideo di dimensione <math>k(n-k)</math>, poiché <math>\dim(Z) = n-k</math>.
+    Definiamo l'applicazione:
+    <math display="true">
+      \begin{array}{rccc}
+        F \ \colon & Z^k & \to & U_\mathcal{B} \\[0.5em]
+        & (z_1, \dots, z_k) & \mapsto & \mathrm{span}\{ v_1 + z_1, \dots, v_k + z_k \}
+      \end{array}
+    </math>
+    Per esercizio si verifica che <math>F</math> è biunivoca. La <strong>carta <math>\varphi_\mathcal{B}</math></strong> è quindi definita come l'inversa di <math>F</math>:
+    <math display="true">
+      \begin{array}{rccc}
+        \varphi_\mathcal{B} \ \colon & U_\mathcal{B} & \to & Z^k \cong (\mathbb{R}^{n-k})^k \cong \mathbb{R}^{k(n-k)}
+      \end{array}
+    </math>
+    poiché <math>\dim(Z) = n-k</math>.
   </reword>
-</definition>
 
-<oss>
   <box uid="page-007-grassmanniana-liscio" image="page-007.png" top=140 right=650 bottom=200 left=20>
     A = { φ_B : U_B → R^{k(n-k)} }
     Ex. e` liscia => Gr_k(V) e` varieta` liscia.
   </box>
   <reword ref="page-007-grassmanniana-liscio">
-    L'insieme di tutte le carte <math>\varphi_\mathcal{B}</math> al variare della base <math>\mathcal{B}</math> forma un atlante liscio. Di conseguenza, la Grassmanniana <math>Gr_k(V)</math> è una varietà liscia di dimensione <math>k(n-k)</math>.
+    L'insieme di tutte le carte al variare della base <math>\mathcal{B}</math> definisce l'atlante:
+    <math display="true">\mathcal{A} \coloneqq \{ \varphi_\mathcal{B} \colon U_\mathcal{B} \to \mathbb{R}^{k(n-k)} \}</math>
+    Per esercizio si verifica che tale atlante è liscio; di conseguenza, la <strong>Grassmanniana <math>Gr_k(V)</math></strong> è una varietà liscia di dimensione <math>k(n-k)</math>.
   </reword>
-</oss>
+</dim>
 
+</section>
 </lesson>
