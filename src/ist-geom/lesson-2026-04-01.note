@@ -1,0 +1,529 @@
+<lesson date="2026-04-01" course="Istituzioni di Geometria" tags="reviewed">
+  <summary>
+    Teorema di raddrizzamento locale dei campi vettoriali. Definizione e algebra di Lie del bracket di Lie. Studio dei campi vettoriali <math>f</math>-correlati e condizioni per il raddrizzamento simultaneo di campi commutanti. Introduzione ai campi vettoriali invarianti a sinistra su gruppi di Lie e loro struttura di algebra di Lie <math>\mathfrak{g}</math>.
+  </summary>
+
+  <section title="Campi Vettoriali">
+
+  <proposition>
+    <box image="2026-04-01/page-043.png" uid="prop-raddrizzamento-box" top="48" right="748" bottom="106" left="22">
+      Prop: Dato $X \in \mathfrak{X}(M)$ tc. $X(p) \neq 0$, $\exists \varphi : U(p) \to \mathbb{R}^n$ carta tc. $\varphi_*(X|_U) = \frac{\partial}{\partial x^1}$.
+    </box>
+    <reword ref="prop-raddrizzamento-box">
+      <strong>Proposizione (Raddrizzamento).</strong> Sia <math>X \in \mathfrak{X}(M)</math> un campo vettoriale e sia <math>p \in M</math> un punto in cui <math>X(p) \neq 0</math>. Allora esiste una carta locale <math>(U, \varphi)</math> centrata in <math>p</math> tale che in tale carta il campo vettoriale (ristretto a <math>U</math>) sia costante e coincida con il primo vettore coordinato:
+      <math display="true">\varphi_*(X|_U) = \frac{\partial}{\partial x^1}</math>
+      <image src="2026-04-01/page-043.png" top="68" right="953" bottom="168" left="583" />
+    </reword>
+  </proposition>
+
+  <dim>
+    <box image="2026-04-01/page-043.png" uid="dim-raddrizzamento-box" top="115" right="748" bottom="552" left="22">
+      Dim: In una carta possiamo supporre $p=0$. $F(x^1, \dots, x^n) = \Phi((0, x^2, \dots, x^n), x^1)$
+      $\Phi$ flusso di X ha senso se $\|x\| \le \varepsilon$.
+      $dF_0 = \text{id}$. Infatti $F|_{x^1=0} = \text{id} \Rightarrow dF_0(e^i) = e^i$ per $i \ge 2$.
+      $dF_0(e^1) = e^1$ perché $e^1 = \gamma(0), \gamma(t) = te^1$.
+      $F \circ \gamma$ è linea integrale di X $\Rightarrow dF_0(e^1) = X(0) = e^1$.
+      F è diffeo. loc. in 0 $\Rightarrow F^{-1}$ carta. In questa carta X diventa $\frac{\partial}{\partial x^1}$ perché le linee integrali di X diventano $\gamma(t) = x + te^1$.
+    </box>
+    <reword ref="dim-raddrizzamento-box">
+      <strong>Dimostrazione.</strong> Senza perdita di generalità, lavoriamo in una carta dove <math>p=0</math> e, a meno di una rotazione del campo vettoriale (o delle coordinate), <math>X(0) = \partial/\partial x^1</math>. Definiamo una mappa <math>F</math> che prende un punto dell'iperpiano <math>\{x^1=0\}</math> e lo trasporta lungo il flusso <math>\Phi</math> di <math>X</math> per un tempo <math>x^1</math>:
+      <math display="true">F(x^1, x^2, \dots, x^n) = \Phi_{x^1}(0, x^2, \dots, x^n)</math>
+      Il differenziale <math>\mathrm dF_0</math> è l'identità. Infatti:
+      <itemize>
+        <item>Per <math>i \ge 2</math>, la restrizione di <math>F</math> all'iperpiano <math>\{x^1=0\}</math> è l'identità, ossia <math>F(0, x^2, \dots, x^n) = (0, x^2, \dots, x^n)</math>, il che implica <math>\mathrm dF_0(e^i) = \frac{\partial F}{\partial x^i}(0) = e^i</math>.</item>
+        <item>Per <math>i = 1</math>, se consideriamo la curva coordinata <math>\gamma(t) = t e^1 = (t, 0, \dots, 0)</math> con <math>\gamma'(0) = e^1</math>, la sua immagine tramite <math>F</math> è la linea integrale del flusso <math>(F \circ \gamma)(t) = \Phi_t(0)</math>. Derivando rispetto a <math>t</math> in <math>t=0</math> e ricordando che il flusso soddisfa l'equazione differenziale <math>\frac{\mathrm d}{\mathrm dt}\Phi_t(q) = X(\Phi_t(q))</math>, otteniamo:
+        <math display="true">\mathrm dF_0(e^1) = \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} (F \circ \gamma)(t) = \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} \Phi_t(0) = X(\Phi_0(0)) = X(0) = e^1</math>
+        </item>
+      </itemize>
+      Essendo <math>\mathrm dF_0 = \mathrm{id}</math>, per il teorema della funzione inversa <math>F</math> è un diffeomorfismo locale in <math>0</math>. Nella nuova carta definita da <math>\varphi = F^{-1}</math>, calcoliamo esplicitamente il campo vettoriale trasformato <math>\varphi_*(X)</math> in un punto <math>y = (y^1, \dots, y^n)</math>. Se consideriamo la curva integrale <math>\gamma(t) = \Phi_t(\varphi^{-1}(y))</math> di <math>X</math> che parte da <math>\varphi^{-1}(y)</math>, tramite la definizione di push-forward si ha:
+      <math display="true">
+        \begin{aligned}
+          \varphi_*(X)(y) &= \mathrm d\varphi_{\varphi^{-1}(y)}(X(\varphi^{-1}(y))) && \small \text{(def. push-forward)} \\
+          &= \mathrm d\varphi_{\varphi^{-1}(y)}\left( \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} \Phi_t(\varphi^{-1}(y)) \right) && \small \text{(prop. di ODE del flusso)} \\
+          &= \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} \varphi(\Phi_t(\varphi^{-1}(y))) && \small \text{(def. di differenziale di una curva)} \\
+          &= \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} F^{-1}(\Phi_t(F(y))) && \small \text{(essendo } \varphi = F^{-1}\text{)}
+        \end{aligned}
+      </math>
+      Poiché <math>F(y) = \Phi_{y^1}(0, y^2, \dots, y^n)</math>, per le proprietà di gruppo del flusso si ha <math>\Phi_t(F(y)) = \Phi_{t+y^1}(0, y^2, \dots, y^n) = F(t+y^1, y^2, \dots, y^n)</math>. Sostituendo:
+      <math display="true">
+        \begin{aligned}
+          \varphi_*(X)(y) &= \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} F^{-1}(F(t+y^1, y^2, \dots, y^n)) \\
+          &= \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} (t+y^1, y^2, \dots, y^n) \\
+          &= (1, 0, \dots, 0) \\
+          &= e^1
+        \end{aligned}
+      </math>
+      Questo implica che le linee integrali del campo vettoriale diventano, in coordinate, le rette parallele al primo asse coordinato, e dunque <math>\varphi_*(X) = \frac{\partial}{\partial x^1}</math>.
+      <image src="2026-04-01/page-043.png" top="184" right="444" bottom="286" left="48" />
+    </reword>
+  </dim>
+
+  </section>
+
+  <section title="Bracket di Lie">
+
+  <definition>
+    <box image="2026-04-01/page-043.png" uid="def-parentesi-lie-box" top="604" right="748" bottom="711" left="22">
+      Def: $X, Y \in \mathfrak{X}(M)$, $[X, Y] \in \mathfrak{X}(M)$ è l'unico campo per cui $[X, Y]f := XYf - YXf \quad \forall f \in \mathcal{C}^\infty(U) \ \forall U \subseteq M \text{ aperto}$.
+    </box>
+    <reword ref="def-parentesi-lie-box">
+      <strong>Definizione.</strong> Dati due campi vettoriali <math>X, Y \in \mathfrak{X}(M)</math>, il loro <strong>bracket di Lie</strong> <math>[X, Y]</math> è l'unico campo vettoriale la cui azione come derivazione sulle funzioni <math>f</math> è data dal commutatore:
+      <math display="true">[X, Y]f = X(Yf) - Y(Xf)</math>
+    </reword>
+  </definition>
+
+  <dim>
+    <box image="2026-04-01/page-043.png" uid="oss-proprieta-lie-box" top="741" right="748" bottom="964" left="22">
+      Oss: $X \in \mathfrak{X}(M) \ f, g \in \mathcal{C}^\infty(U)$
+      -) $X(fg) = (Xf)g + f(Xg) \quad$ Leibnitz
+      -) $[X, Y](fg) = XY(fg) - YX(fg) = \dots = g [X, Y]f + f [X, Y]g$
+      $\Rightarrow [X, Y]$ soddisfa Leibnitz.
+    </box>
+    <reword ref="oss-proprieta-lie-box">
+      <strong>Dimostrazione (Buona definizione).</strong> Siano <math>X, Y \in \mathfrak{X}(M)</math> e <math>f, g \in \mathcal{C}^\infty(U)</math>.
+      <itemize>
+        <item>La regola di Leibniz per <math>X</math> è data da:
+        <math display="true">X(fg) = (Xf)g + f(Xg)</math>
+        </item>
+        <item>Calcoliamo esplicitamente l'azione di <math>XY</math> sul prodotto <math>fg</math>:
+        <math display="true">
+          \begin{aligned}
+            XY(fg) &= X((Yf)g + f(Yg)) \\
+            &= (XYf)g + (Yf)(Xg) + (Xf)(Yg) + f(XYg)
+          \end{aligned}
+        </math>
+        Simmetricamente, scambiando <math>X</math> e <math>Y</math> si ha:
+        <math display="true">
+          YX(fg) = (YXf)g + (Xf)(Yg) + (Yf)(Xg) + f(YXg)
+        </math>
+        Sottraendo le due espressioni, i termini misti con le derivate prime si cancellano, e otteniamo:
+        <math display="true">
+          [X, Y](fg) = XY(fg) - YX(fg) = ([X, Y]f)g + f([X, Y]g)
+        </math>
+        Questo mostra che <math>[X, Y]</math> soddisfa la regola di Leibniz ed è pertanto un campo vettoriale.
+        </item>
+      </itemize>
+    </reword>
+
+    <box image="2026-04-01/page-044.png" uid="oss-derivazione-punto-box" top="15" right="748" bottom="125" left="22">
+      Quindi ha senso definire $[X, Y](p)(f) := ([X, Y]f)(p) \quad \forall f \in \mathcal{C}^\infty(U(p))$
+      ovvero $[X, Y](p)$ è una derivazione.
+    </box>
+    <reword ref="oss-derivazione-punto-box">
+      Di conseguenza, ha senso definire il valore di <math>[X, Y]</math> nel punto <math>p</math> tramite l'azione sulle funzioni locali <math>f \in \mathcal{C}^\infty(U(p))</math>:
+      <math display="true">
+        [X, Y](p)(f) := ([X, Y]f)(p)
+      </math>
+      Questo definisce una derivazione al punto <math>p</math>, ovvero un vettore tangente <math>[X, Y](p) \in T_pM</math>.
+    </reword>
+  </dim>
+
+  <proposition id="lie-bracket-distributivity">
+    <reword>
+      <strong>Proposizione (Bilinearità del bracket di Lie).</strong> Il bracket di Lie è bilineare rispetto al campo dei reali <math>\mathbb{R}</math>. Soddisfa cioè l'additività e l'omogeneità rispetto agli scalari reali in entrambi gli argomenti:
+      <math display="true">
+        [X_1 + X_2, Y] = [X_1, Y] + [X_2, Y], \quad [aX, Y] = a[X, Y] \quad \forall a \in \mathbb{R}
+      </math>
+      Per induzione, per combinazioni lineari finite di campi vettoriali a coefficienti reali <math>a_i, b_j \in \mathbb{R}</math> vale la regola di espansione:
+      <math display="true">
+        \left[ \sum_{i=1}^k a_i U_i, \sum_{j=1}^m b_j V_j \right] = \sum_{i=1}^k \sum_{j=1}^m a_i b_j [U_i, V_j]
+      </math>
+    </reword>
+  </proposition>
+
+  <dim>
+    <reword>
+      <strong>Dimostrazione.</strong> Valutiamo l'azione del bracket su una generica funzione <math>f \in \mathcal{C}^\infty(U)</math>:
+      <itemize>
+        <item><strong>Additività:</strong>
+        <math display="true">
+          \begin{aligned}
+            [X_1 + X_2, Y]f &= (X_1 + X_2)(Yf) - Y((X_1 + X_2)f) \\
+            &= X_1(Yf) + X_2(Yf) - Y(X_1f + X_2f) \\
+            &= X_1(Yf) - Y(X_1f) + X_2(Yf) - Y(X_2f) \\
+            &= [X_1, Y]f + [X_2, Y]f
+          \end{aligned}
+        </math>
+        L'additività sul secondo argomento segue in modo analogo (oppure per antisimmetria).</item>
+        <item><strong>Omogeneità:</strong> Per ogni costante reale <math>a \in \mathbb{R}</math>, ricordando che i campi agiscono come operatori <math>\mathbb{R}</math>-lineari (per cui <math>Y(ag) = a Y(g)</math>), si ha:
+        <math display="true">
+          \begin{aligned}
+            [aX, Y]f &= (aX)(Yf) - Y((aX)f) \\
+            &= a X(Yf) - Y(a (Xf)) \\
+            &= a X(Yf) - a Y(Xf) \\
+            &= a (X(Yf) - Y(Xf)) = a [X, Y]f
+          \end{aligned}
+        </math>
+        L'omogeneità sul secondo argomento segue in modo analogo.</item>
+      </itemize>
+      La formula di espansione generale segue per induzione lineare combinando le proprietà di additività e omogeneità.
+    </reword>
+  </dim>
+
+  <definition>
+    <box image="2026-04-01/page-044.png" uid="def-algebra-lie-box" top="138" right="748" bottom="235" left="22">
+      Def: Un'ALGEBRA DI LIE è uno spazio vettoriale reale A munito di operazione $[,]: A \times A \to A$ bilineare antisimmetrica su cui vale l'ID. DI JACOBI:
+      $[[x, y], z] + [[y, z], x] + [[z, x], y] = 0 \quad \forall x, y, z \in A$.
+    </box>
+    <reword ref="def-algebra-lie-box">
+      <strong>Definizione.</strong> Un'<strong>algebra di Lie</strong> è uno spazio vettoriale reale <math>\mathfrak{a}</math> dotato di un'operazione bilineare antisimmetrica <math>[\cdot, \cdot] \colon \mathfrak{a} \times \mathfrak{a} \to \mathfrak{a}</math> che soddisfa l'<strong>identità di Jacobi</strong>:
+      <math display="true">
+        [[x, y], z] + [[y, z], x] + [[z, x], y] = 0 \quad \forall x, y, z \in \mathfrak{a}
+      </math>
+    </reword>
+  </definition>
+ 
+  <esempio>
+    <box image="2026-04-01/page-044.png" uid="es-lie-algebra-xm-box" top="265" right="540" bottom="295" left="22">
+      Ex: $\mathfrak{X}(M)$ è un'algebra di Lie con $[,]$.
+    </box>
+    <reword ref="es-lie-algebra-xm-box">
+      <strong>Esempio.</strong> Lo spazio dei campi vettoriali <math>\mathfrak{X}(M)</math> munito del bracket di Lie è un'algebra di Lie (di dimensione infinita).
+    </reword>
+  </esempio>
+ 
+  <esercizio id="ex-lie-bracket-coord">
+    <box image="2026-04-01/page-044.png" uid="ex-lie-bracket-coord-box" top="312" right="660" bottom="348" left="22">
+      Ex: Se $X, Y \in \mathfrak{X}(U), U \subseteq \mathbb{R}^n \quad [X, Y]^j = X^i \frac{\partial Y^j}{\partial x^i} - Y^i \frac{\partial X^j}{\partial x^i}$
+    </box>
+    <reword ref="ex-lie-bracket-coord-box">
+      <strong>Esercizio.</strong> In una carta locale <math>U \subseteq \mathbb{R}^n</math>, le componenti del bracket di Lie <math>[X, Y]</math> sono espresse tramite le derivate parziali delle componenti dei campi:
+      <math display="true">[X, Y]^j = \sum_{i=1}^n \left( X^i \frac{\partial Y^j}{\partial x^i} - Y^i \frac{\partial X^j}{\partial x^i} \right)</math>
+    </reword>
+  </esercizio>
+ 
+  <corollario>
+    <box image="2026-04-01/page-044.png" uid="cor-lie-partial-box" top="362" right="440" bottom="398" left="22">
+      Cor: Se $X = \frac{\partial}{\partial x^i}$ allora $[X, Y] = \frac{\partial Y}{\partial x^i}$
+    </box>
+    <reword ref="cor-lie-partial-box">
+      <strong>Corollario.</strong> Se uno dei due campi è un campo coordinato <math>X = \partial/\partial x^i</math>, il bracket di Lie si riduce alla derivata parziale dell'altro campo: <math>[ \partial/\partial x^i, Y ] = \partial Y / \partial x^i</math>.
+    </reword>
+  </corollario>
+ 
+  <corollario>
+    <box image="2026-04-01/page-044.png" uid="cor-lie-partial-commute-box" top="408" right="240" bottom="445" left="22">
+      Cor: $[\frac{\partial}{\partial x^i}, \frac{\partial}{\partial x^j}] = 0$
+    </box>
+    <reword ref="cor-lie-partial-commute-box">
+      <strong>Corollario.</strong> I campi coordinati commutano sempre tra loro: <math>[\partial/\partial x^i, \partial/\partial x^j] = 0</math>.
+    </reword>
+  </corollario>
+
+  <esempio>
+    <box image="2026-04-01/page-044.png" uid="es-algebra-matriciale-box" top="468" right="748" bottom="618" left="22">
+      Es: $M(n) \ni A, B \quad [A, B] := AB - BA$ ed $M(n)$ diventa un'algebra di Lie.
+      Ex: $A, B \in M(n) \ X(x) = Ax \ Y(x) = Bx \Rightarrow [X, Y](x) = (BA - AB)(x)$
+    </box>
+    <reword ref="es-algebra-matriciale-box">
+      <strong>Esempio.</strong> Lo spazio delle matrici quadrate <math>M(n, \mathbb{R})</math> è un'algebra di Lie rispetto al commutatore di matrici <math>[A, B] = AB - BA</math>. Se associamo a ogni matrice un campo vettoriale lineare <math>X_A(x) = Ax</math>, si osserva che il bracket di Lie dei campi corrisponde (a meno di un segno) al commutatore delle matrici: <math>[X_A, X_B] = X_{[B, A]}</math>.
+    </reword>
+  </esempio>
+
+  <esempio>
+    <box image="2026-04-01/page-044.png" uid="es-leibnitz-funzioni-box" top="620" right="748" bottom="665" left="22">
+      Ex: $X, Y \in \mathfrak{X} \ f, g \in \mathcal{C}^\infty(M)$
+      $[fX, gY] = fg [X, Y] + f(Xg)Y - g(Yf)X$
+    </box>
+    <reword ref="es-leibnitz-funzioni-box">
+      <strong>Esercizio.</strong> Il bracket di Lie non è <math>\mathcal{C}^\infty(M)</math>-lineare, ma soddisfa una variante della regola di Leibniz quando i campi sono moltiplicati per funzioni:
+      <math display="true">[fX, gY] = fg[X, Y] + f(Xg)Y - g(Yf)X</math>
+    </reword>
+  </esempio>
+
+  <corollario>
+    <box image="2026-04-01/page-044.png" uid="cor-span-box" top="675" right="680" bottom="715" left="22">
+      Cor: $[fX, gY](p) \in \text{Span}(X(p), Y(p), [X, Y](p))$
+    </box>
+    <reword ref="cor-span-box">
+      <strong>Corollario.</strong> In ogni punto <math>p</math>, il vettore <math>[fX, gY]_p</math> appartiene sempre allo spazio generato dai vettori <math>X_p, Y_p</math> e <math>[X, Y]_p</math>.
+    </reword>
+  </corollario>
+
+  <oss>
+    <box image="2026-04-01/page-044.png" uid="oss-pullback-lie-box" top="725" right="748" bottom="770" left="22">
+      Oss: $\varphi : M \xrightarrow{\sim} N$ diffeo. $X, Y \in \mathfrak{X}(M) \quad \varphi_*([X, Y]) = [\varphi_* X, \varphi_* Y]$
+    </box>
+    <reword ref="oss-pullback-lie-box">
+      <strong>Osservazione.</strong> Se <math>\varphi</math> è un diffeomorfismo, il push-forward preserva la struttura di algebra di Lie: la parentesi dei campi trasformati è uguale alla trasformata della parentesi originale.
+    </reword>
+  </oss>
+
+  <definition>
+    <box image="2026-04-01/page-044.png" uid="def-f-correlati-box" top="775" right="748" bottom="840" left="22">
+      Def: $f: M \to N$ liscia. $X \in \mathfrak{X}(M), Y \in \mathfrak{X}(N)$ sono f-CORRELATI se $\forall p \quad df_p(X(p)) = Y(f(p))$.
+    </box>
+    <reword ref="def-f-correlati-box">
+      <strong>Definizione.</strong> Sia <math>f : M \to N</math> un'applicazione liscia. Un campo vettoriale <math>X</math> su <math>M</math> e un campo <math>Y</math> su <math>N</math> si dicono <strong><math>f</math>-correlati</strong> se il differenziale di <math>f</math> trasporta i vettori di <math>X</math> in quelli di <math>Y</math>:
+      <math display="true">\mathrm df_p(X_p) = Y_{f(p)} \quad \forall p \in M</math>
+    </reword>
+  </definition>
+
+  <esempio>
+    <box image="2026-04-01/page-044.png" uid="es-f-diffeo-correlati-box" top="845" right="540" bottom="870" left="22">
+      Es: f diffeo $\Rightarrow X$ e $f_*(X)$ sono correlati.
+    </box>
+    <reword ref="es-f-diffeo-correlati-box">
+      <strong>Esempio.</strong> Se <math>f</math> è un diffeomorfismo, ogni campo vettoriale <math>X</math> su <math>M</math> è <math>f</math>-correlato al suo push-forward <math>f_*X</math> su <math>N</math>.
+    </reword>
+  </esempio>
+
+  <esempio>
+    <box image="2026-04-01/page-044.png" uid="ex-correlati-bracket-box" top="875" right="748" bottom="965" left="22">
+      Ex: Se $X_1, Y_1$ sono f-correlati, $X_2, Y_2$ sono f-correlati $\Rightarrow [X_1, X_2]$ e $[Y_1, Y_2]$ sono f-correlati.
+    </box>
+    <reword ref="ex-correlati-bracket-box">
+      <strong>Esercizio.</strong> Se <math>X_1, Y_1</math> sono <math>f</math>-correlati e <math>X_2, Y_2</math> sono anch'essi <math>f</math>-correlati, allora il bracket di Lie <math>[X_1, X_2]</math> è <math>f</math>-correlato al bracket <math>[Y_1, Y_2]</math>.
+    </reword>
+  </esempio>
+
+  <corollario>
+    <box image="2026-04-01/page-045.png" uid="cor-sottovarieta-bracket-box" top="15" right="680" bottom="105" left="22">
+      Cor: $N \subseteq M$ sottovarietà, $X_1, X_2 \in \mathfrak{X}(N) \rightsquigarrow [X_1, X_2] \in \mathfrak{X}(N)$.
+      $\bar{X}_1, \bar{X}_2$ estensioni qualsiasi a $M$.
+      Per $p \in N \quad (X_1, X_2)(p) = [\bar{X}_1, \bar{X}_2](p)$ è vero.
+      Anche in $M$, sono f-correlati da $f: N \hookrightarrow M$.
+    </box>
+    <reword ref="cor-sottovarieta-bracket-box">
+      <strong>Corollario.</strong> Se <math>N</math> è una sottovarietà di <math>M</math>, il bracket di Lie di due campi tangenti a <math>N</math> è ancora un campo tangente a <math>N</math>. Inoltre, il valore del bracket in un punto di <math>N</math> può essere calcolato usando estensioni arbitrarie dei campi su <math>M</math>. Questo è un caso particolare della proprietà di <math>f</math>-correlazione applicata all'inclusione <math>i : N \hookrightarrow M</math>.
+      <image src="2026-04-01/page-045.png" top="15" right="953" bottom="125" left="700" />
+    </reword>
+  </corollario>
+
+  <proposition>
+    <box image="2026-04-01/page-045.png" uid="prop-flussi-commutano-box" top="115" right="748" bottom="235" left="22">
+      Prop: $X, Y \in \mathfrak{X}(U) \ U \subseteq \mathbb{R}^n$, per $s, t$ abbastanza piccoli
+      $\psi_t(\phi_s(p)) - \phi_s(\psi_t(p)) = st [X, Y](p) + o(s^2+t^2)$
+    </box>
+    <reword ref="prop-flussi-commutano-box">
+      <strong>Proposizione.</strong> Siano <math>X, Y \in \mathfrak{X}(U)</math> con <math>U \subseteq \mathbb{R}^n</math>. Per <math>s, t</math> abbastanza piccoli, i flussi locali <math>\phi_s</math> e <math>\psi_t</math> dei due campi soddisfano:
+      <math display="true">
+        \psi_t(\phi_s(p)) - \phi_s(\psi_t(p)) = st [X, Y](p) + o(s^2+t^2)
+      </math>
+    </reword>
+  </proposition>
+
+  <definition>
+    <box image="2026-04-01/page-045.png" uid="def-campi-commutano-box" top="252" right="748" bottom="361" left="22">
+      Def: $X, Y \in \mathfrak{X}(M)$ commutano $\iff [X, Y] \equiv 0$.
+      Due flussi $\phi, \psi$ commutano localmente se $\forall p \exists \varepsilon > 0$ tc. $\psi_t(\phi_s(p)) = \phi_s(\psi_t(p)) \quad \forall |s|, |t| < \varepsilon$.
+    </box>
+    <reword ref="def-campi-commutano-box">
+      <strong>Definizione.</strong> Due campi vettoriali <math>X, Y \in \mathfrak{X}(M)</math> <strong>commutano</strong> se il loro bracket di Lie è identicamente nullo, ovvero <math>[X, Y] \equiv 0</math>. Due flussi locali <math>\phi</math> e <math>\psi</math> <strong>commutano localmente</strong> se per ogni <math>p \in M</math> esiste <math>\varepsilon > 0</math> tale che:
+      <math display="true">
+        \psi_t(\phi_s(p)) = \phi_s(\psi_t(p)) \quad \forall |s|, |t| < \varepsilon
+      </math>
+    </reword>
+  </definition>
+
+  <proposition>
+    <box image="2026-04-01/page-045.png" uid="prop-campi-flussi-commutano-box" top="375" right="680" bottom="410" left="22">
+      Prop: $X, Y \in \mathfrak{X}(M)$ commutano $\iff$ i loro flussi commutano loc.
+    </box>
+    <reword ref="prop-campi-flussi-commutano-box">
+      <strong>Proposizione.</strong> Due campi vettoriali commutano se e solo se i loro flussi locali commutano.
+    </reword>
+  </proposition>
+
+  <dim>
+    <box image="2026-04-01/page-045.png" uid="dim-campi-flussi-commutano-box" top="420" right="748" bottom="715" left="22">
+      Dim:
+      $(\Leftarrow)$ segue da prop.
+      $(\Rightarrow)$ $p \in M$
+      i) $X(p) = Y(p) = 0 \Rightarrow \phi_s(p) = \psi_t(p) = p$ commutano.
+      ii) $X(p) \neq 0 \rightsquigarrow$ in una carta $p=0, X = \frac{\partial}{\partial x^1}$.
+      $0 \equiv [X, Y] = \frac{\partial Y}{\partial x^1}$, per questa simmetria otteniamo:
+      $\phi(x, t) = x + te^1, \psi(x+ue_1, t) = \psi(x, t) + ue_1 \Rightarrow$ commutano.
+    </box>
+    <reword ref="dim-campi-flussi-commutano-box">
+      <strong>Dimostrazione.</strong> 
+      <itemize>
+        <item><math>\boxed{\Leftarrow}</math> Segue immediatamente dalla formula per il difetto di commutazione vista in precedenza: se i flussi locali commutano, il membro sinistro si annulla, per cui anche il bracket di Lie <math>[X, Y]</math> deve essere nullo.</item>
+        <item><math>\boxed{\Rightarrow}</math> Sia <math>p \in M</math>. Distinguiamo due casi:
+          <itemize>
+            <item>Se <math>X(p) = Y(p) = 0</math>, allora <math>\phi_s(p) = \psi_t(p) = p</math>, quindi i flussi commutano banalmente.</item>
+            <item>Se <math>X(p) \neq 0</math>, in una opportuna carta locale in cui <math>p = 0</math> possiamo raddrizzare <math>X</math>, ponendo <math>X = \frac{\partial}{\partial x^1}</math>. Poiché <math>0 \equiv [X, Y] = \frac{\partial Y}{\partial x^1}</math>, le componenti del campo <math>Y</math> non dipendono da <math>x^1</math>. Grazie a questa simmetria, i rispettivi flussi soddisfano:
+            <math display="true">
+              \phi_s(x) = x + s e_1, \quad \psi_t(x + u e_1) = \psi_t(x) + u e_1
+            </math>
+            da cui segue che i flussi commutano.
+            </item>
+          </itemize>
+        </item>
+      </itemize>
+      <image src="2026-04-01/page-045.png" top="575" right="953" bottom="635" left="724" />
+      <image src="2026-04-01/page-045.png" top="645" right="953" bottom="715" left="724" />
+    </reword>
+  </dim>
+
+  <esercizio>
+    <box image="2026-04-01/page-045.png" uid="ex-campi-completi-commutano-box" top="725" right="748" bottom="755" left="22">
+      Ex: $X, Y$ completi, $[X, Y] \equiv 0 \iff \psi_t \circ \phi_s = \phi_s \circ \psi_t \quad \forall s, t \in \mathbb{R}$.
+    </box>
+    <reword ref="ex-campi-completi-commutano-box">
+      <strong>Esercizio.</strong> Se sia <math>X</math> che <math>Y</math> sono completi, i loro flussi <math>\phi</math> e <math>\psi</math> commutano localmente se e solo se commutano globalmente, ovvero:
+      <math display="true">
+        \phi_s(\psi_t(p)) = \psi_t(\phi_s(p)) \quad \forall p \in M, \ \forall s, t \in \mathbb{R}
+      </math>
+    </reword>
+  </esercizio>
+
+  <proposition id="prop-raddrizzamento-simultaneo">
+    <box image="2026-04-01/page-045.png" uid="prop-raddrizzamento-simultaneo-box" top="771" right="748" bottom="855" left="22">
+      Prop (Raddrizzamento simultaneo di campi): $X_1, \dots, X_k \in \mathfrak{X}(M)$
+      Dato $p \in M, \exists \varphi : U(p) \xrightarrow{\sim} \mathbb{R}^n$ tc. $\varphi_*(X_i) = \frac{\partial}{\partial x^i}$
+      $\iff$ 1) $X_1(p), \dots, X_k(p)$ indip.
+      2) $[X_i, X_j] \equiv 0$ in un int. di p.
+    </box>
+    <reword ref="prop-raddrizzamento-simultaneo-box">
+      <strong>Proposizione (Raddrizzamento simultaneo di campi).</strong> Siano <math>X_1, \dots, X_k \in \mathfrak{X}(M)</math>. Dato <math>p \in M</math>, esiste una carta locale <math>\varphi \colon U(p) \to \mathbb{R}^n</math> tale che <math>\varphi_*(X_i) = \frac{\partial}{\partial x^i}</math> per ogni <math>i = 1, \dots, k</math> se e solo se:
+      <enumerate>
+        <item>i vettori tangenti <math>X_1(p), \dots, X_k(p)</math> sono linearmente indipendenti;</item>
+        <item><math>[X_i, X_j] \equiv 0</math> in un intorno di <math>p</math> per ogni <math>i, j = 1, \dots, k</math>.</item>
+      </enumerate>
+    </reword>
+  </proposition>
+
+  <dim>
+    <box image="2026-04-01/page-045.png" uid="dim-raddrizzamento-simultaneo-p1-box" top="910" right="748" bottom="985" left="22">
+      Dim: [=>] $\left[ \frac{\partial}{\partial x^i}, \frac{\partial}{\partial x^j} \right] = 0 \quad \forall i, j$.
+      [<=] Prendiamo carte tc. $p=0, X_i(0) = \frac{\partial}{\partial x^i}$.
+    </box>
+    <reword ref="dim-raddrizzamento-simultaneo-p1-box">
+      <strong>Dimostrazione.</strong>
+      <br/>
+      <math>\boxed{\Rightarrow}</math> Questa implicazione è immediata: se esiste una carta locale in cui <math>X_i = \partial / \partial x^i</math> per ogni <math>i = 1, \dots, k</math>, allora i campi sono banalmente indipendenti e commutano poiché le derivate parziali commutano.
+      <br />
+      <math>\boxed{\Leftarrow}</math> Per la sufficienza, sia <math>p \in M</math>. Scegliamo una carta locale centrata in <math>p</math> (cioè <math>p = 0</math>) in cui <math>X_i(0) = e^i = \partial / \partial x^i|_0</math> per <math>i = 1, \dots, k</math>.
+    </reword>
+
+    <box image="2026-04-01/page-046.png" uid="dim-raddrizzamento-simultaneo-p2-a-box" top="15" right="748" bottom="125" left="22">
+      $F(x^1, \dots, x^n) = \Phi^k_{x^k} \circ \dots \circ \Phi^2_{x^2} \circ \Phi^1_{x^1}(0, \dots, 0, x^{k+1}, \dots, x^n)$
+      $\Phi_t^i := \text{flusso di } X_i \text{ è definita per } \|x\| < \epsilon$
+    </box>
+    <reword ref="dim-raddrizzamento-simultaneo-p2-a-box">
+      Siano <math>\Phi_t^i</math> i flussi locali dei campi vettoriali <math>X_i</math>, definiti in un intorno di <math>0</math> per tempi piccoli <math>|t| &lt; \varepsilon</math>. Definiamo la mappa locale:
+      <math display="true">
+        F(x^1, \dots, x^n) = \Phi_{x^k}^k \circ \dots \circ \Phi_{x^1}^1 (0, \dots, 0, x^{k+1}, \dots, x^n)
+      </math>
+      Grazie alla commutatività locale dei flussi, l'ordine di composizione dei flussi è ininfluente.
+      <image src="2026-04-01/page-046.png" top="16" right="953" bottom="125" left="583" />
+    </reword>
+
+    <box image="2026-04-01/page-046.png" uid="dim-raddrizzamento-simultaneo-p2-b-box" top="130" right="950" bottom="325" left="22">
+      $dF_0 = id. \quad F|_{\{x_1 = \dots = x_k = 0\}} = id \Rightarrow dF_0(e^i) = e^i \quad \forall i > k$.
+      $1 \le i \le k :$
+      $F(te^i) = F(0, \dots, 0, t, 0, \dots, 0) = \Phi^i_t(0) = \gamma^i_0(t)$
+      $dF_0(e^i) = X^i(0) = e^i$
+      $F$ diffeo loc. in 0
+      { principio IKEA: dobbiamo usare tutte le ipotesi
+    </box>
+    <reword ref="dim-raddrizzamento-simultaneo-p2-b-box">
+      Calcoliamo il differenziale <math>\mathrm dF_0</math> all'origine mostrando che coincide con l'identità:
+      <itemize>
+        <item>Per la restrizione al sottospazio <math>\{x^1 = \dots = x^k = 0\}</math>, poiché ciascun flusso a tempo zero agisce come l'identità (<math>\Phi_0^i = \text{id}</math>), la mappa <math>F</math> coincide con l'identità, per cui si ha:
+        <math display="true">
+          \mathrm dF_0(e^i) = e^i \quad \forall i &gt; k
+        </math>
+        </item>
+        <item>Per <math>1 \le i \le k</math>, valutando lungo la direzione <math>e^i</math>, si ha <math>F(t e^i) = F(0, \dots, 0, t, 0, \dots, 0) = \Phi_t^i(0) = \gamma^i_0(t)</math> (la curva integrale di <math>X_i</math> uscente dall'origine). Dunque:
+        <math display="true">
+          \mathrm dF_0(e^i) = \frac{\mathrm d}{\mathrm dt}\Big|_{t=0} \Phi_t^i(0) = X_i(0) = e^i
+        </math>
+        </item>
+      </itemize>
+      Di conseguenza, il differenziale all'origine <math>\mathrm dF_0</math> è l'applicazione identità. Per il teorema della funzione inversa, <math>F</math> è un diffeomorfismo locale in un intorno dell'origine.
+    </reword>
+
+    <box image="2026-04-01/page-046.png" uid="dim-raddrizzamento-simultaneo-p2-c-box" top="320" right="748" bottom="540" left="22">
+      Mostriamo che $F^{-1}$ manda $X^i$ in $\frac{\partial}{\partial x^i} \quad \forall i=1, \dots, k$, caso $i=k$.
+      $F(x + t e^k) = \Phi^k_{x^k + t}(p)$
+      $\Rightarrow F$ manda le linee integrali di $\frac{\partial}{\partial x^k}$ in quelle di $X^k$.
+      $\Rightarrow F$ manda $\frac{\partial}{\partial x^k}$ in $X^k$.
+      Per gli altri uso che commutano.
+    </box>
+    <reword ref="dim-raddrizzamento-simultaneo-p2-c-box">
+      Mostriamo ora che la mappa inversa <math>F^{-1}</math> manda i campi <math>X_i</math> nei campi coordinati <math>\partial / \partial x^i</math>, cioè che <math>F_*(\partial / \partial x^i) = X_i</math> per ogni <math>i = 1, \dots, k</math>.
+
+      Consideriamo prima il caso <math>i = k</math>. Per definizione di <math>F</math>, si ha:
+      <math display="true">
+        F(x + t e^k) = \Phi_{x^k + t}^k(p)
+      </math>
+      dove <math>p = \Phi_{x^{k-1}}^{k-1} \circ \dots \circ \Phi_{x^1}^1(0, \dots, 0, x^{k+1}, \dots, x^n)</math>. Si nota che <spoiler><preview>la curva <math>\Phi_{x^k + t}^k(p)</math> è proprio una linea integrale per <math>X_k</math>.</preview><content> che soddisfa il sistema di equazioni differenziali ordinarie:
+      <math display="true">
+        \begin{cases}
+          \sigma'(t) = X_k(\sigma(t)) \\
+          \sigma(0) = F(x)
+        \end{cases}
+      </math>
+      dove <math>\sigma(t) = F(x + t e^k)</math>, dato che per definizione di flusso si ha <math>\sigma(0) = \Phi_{x^k}^k(p) = F(x)</math> e:
+      <math display="true">
+        \sigma'(t) = \frac{\mathrm d}{\mathrm dt} \Phi_{x^k+t}^k(p) = X_k(\Phi_{x^k+t}^k(p)) = X_k(\sigma(t))
+      </math>
+      </content></spoiler>
+      Questo mostra che <math>F</math> mappa le linee integrali del campo coordinato <math>\partial / \partial x^k</math> nelle linee integrali di <math>X_k</math>. Vediamo ora anche che, valutando in <math>t=0</math>, per la definizione di push-forward otteniamo:
+      <math display="true">
+        F_* \left( \frac{\partial}{\partial x^k} \right)\Big|_{F(x)} = \mathrm dF_x\left( \frac{\partial}{\partial x^k} \right) = \left. \frac{\mathrm d}{\mathrm dt} \right|_{t=0} F(x+t e^k) = X_k(F(x))
+      </math>
+      Pertanto, <math>F_* \left( \frac{\partial}{\partial x^k} \right) = X_k</math>.
+
+      Per gli altri indici <math>i &lt; k</math>, il risultato segue analogamente sfruttando la commutatività dei flussi per portare <math>\Phi_{x^i}^i</math> in ultima posizione nella composizione prima di derivare rispetto a <math>x^i</math>.
+    </reword>
+  </dim>
+
+  </section>
+
+  <section title="Campi vettoriali su gruppi di Lie">
+
+  <definition>
+    <box image="2026-04-01/page-046.png" uid="def-campo-invariante-box" top="583" right="748" bottom="686" left="22">
+      G gruppo di Lie. $e \in G, \mathfrak{g} = T_eG$.
+      $v \in \mathfrak{g} \rightsquigarrow X \in \mathfrak{X}(G) \ X(g) := d(L_g)_e(v)$.
+      Oss: X è invariante a sx. cioè $(L_g)_*(X) = X$.
+    </box>
+    <reword ref="def-campo-invariante-box">
+      <strong>Definizione.</strong> Sia <math>G</math> un gruppo di Lie con elemento neutro <math>e \in G</math> e poniamo <math>\mathfrak{g} = T_eG</math>. Ogni vettore <math>v \in \mathfrak{g}</math> definisce un campo vettoriale <math>X \in \mathfrak{X}(G)</math> definendo:
+      <math display="true">
+        X(g) := \mathrm d(L_g)_e(v)
+      </math>
+      Tale campo <math>X</math> è <strong>invariante a sinistra</strong>, ossia soddisfa:
+      <math display="true">
+        (L_g)_*(X) = X \quad \forall g \in G
+      </math>
+      <image src="2026-04-01/page-046.png" top="588" right="953" bottom="754" left="724" />
+    </reword>
+  </definition>
+
+  <dim>
+    <box image="2026-04-01/page-046.png" uid="dim-invarianza-box" top="692" right="748" bottom="855" left="22">
+      Tesi: $d(L_g)_h(X(h)) = X(L_g(h)) = X(gh)$
+      $X(gh) = d(L_{gh})_e(v) = d(L_g \circ L_h)_e(v) = d(L_g)_h \circ d(L_h)_e(v) = d(L_g)_h X(h)$
+    </box>
+    <reword ref="dim-invarianza-box">
+      <strong>Verifica dell'invarianza.</strong> La proprietà segue direttamente dalla regola della catena applicata alla composizione delle traslazioni a sinistra <math>L_{gh} = L_g \circ L_h</math>:
+      <math display="true">
+        X(gh) = \mathrm d(L_{gh})_e(v) = \mathrm d(L_g)_h(\mathrm d(L_h)_e(v)) = \mathrm d(L_g)_h(X(h))
+      </math>
+    </reword>
+  </dim>
+
+  <proposition>
+    <box image="2026-04-01/page-047.png" uid="prop-sottoalgebra-invarianti-box" top="15" right="350" bottom="36" left="22">
+      Prop: È una sottoalgebra.
+    </box>
+    <reword ref="prop-sottoalgebra-invarianti-box">
+      <strong>Proposizione.</strong> L'insieme dei campi vettoriali invarianti a sinistra forma una sottoalgebra di Lie di <math>\mathfrak{X}(G)</math>.
+    </reword>
+  </proposition>
+
+  <dim>
+    <box image="2026-04-01/page-047.png" uid="dim-sottoalgebra-invarianti-box" top="48" right="680" bottom="140" left="22">
+      Dim: $X, Y$ inv. a sx $\Rightarrow [X, Y]$ inv. a sx.
+      $X, Y$ inv. per $L_g \Rightarrow [X, Y]$ inv. per $L_g \ \forall g$
+    </box>
+    <reword ref="dim-sottoalgebra-invarianti-box">
+      <strong>Dimostrazione.</strong> Siano <math>X, Y</math> due campi invarianti a sinistra. Poiché il differenziale di un diffeomorfismo (qui <math>L_g</math>) preserva il bracket di Lie, si ha <math>(L_g)_*[X, Y] = [(L_g)_* X, (L_g)_* Y] = [X, Y]</math>. Dunque anche <math>[X, Y]</math> è invariante a sinistra.
+    </reword>
+  </dim>
+  </section>
+</lesson>

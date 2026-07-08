@@ -25,6 +25,32 @@ AutoNotes now includes a robust **Fuzzy Search Dashboard** to locate definitions
 
 <br clear="right" />
 
+## Study Repeat Mode
+
+<img src="docs/repeat-mode.png" alt="Study Repeat Mode" width="320" align="left" style="margin-right: 20px; border: 2px solid #1a1a1a; box-shadow: 4px 4px 0px #000000;">
+
+If you want to read through notes without getting distracted by a wall of text, you can turn on **Study Repeat Mode** (or Reword Focus).
+
+- **Focus Fading**: Everything fades out to `5%` opacity except for the block right in the middle of the screen.
+- **Auto Scroll Tracking**: The focus moves automatically as you scroll, guiding your eyes naturally to the next section.
+- **Side Indicator**: A small arrow pointer follows you on the left margin so you never lose your place.
+- **Step-by-step Reading**: Great for reviewing proofs, definitions, or equations line-by-line, keeping your focus strictly on what you're currently reading.
+
+<br clear="left" />
+
+## Collapsible Spoilers
+
+<img src="docs/spoilers.png" alt="Collapsible Spoilers" width="320" align="right" style="margin-left: 20px; border: 2px solid #1a1a1a; box-shadow: 4px 4px 0px #000000;">
+
+AutoNotes supports collapsible `<spoiler>` blocks to hide details and let you drill down into math arguments with more and more depth.
+
+- **Progressive Disclosure**: Hide long calculations, checks, or proofs so you can grasp the big picture first, then click to reveal the details.
+- **Nested Details**: Since spoilers can be nested inside other spoilers, you can drill down into proofs of proofs, or step-by-step expansions of equations.
+- **Seamless Inline Flow**: Spoilers integrate right inside text paragraphs with proper punctuation handling and inline math.
+- **Click to Toggle**: Just click the text to expand or collapse the section, complete with responsive Lucide icons.
+
+<br clear="right" />
+
 ## Agent-Assisted Transcription
 
 This project is explicitly designed to be operated by AI agents. Agents are responsible for viewing source images, extracting mathematical content, and mapping specific regions (using a 1000x1000 coordinate system) into `.note` files.
@@ -120,6 +146,7 @@ Note files use an XML-like syntax to map transcriptions to images using a **1000
 - `<math>` and `<math display="true">`: KaTeX-powered mathematical expressions.
 - `<reword>`: Formal textbook-style rewrite of the transcription.
 - `<image src="name.jpg" top="..." right="..." bottom="..." left="..." />`: Inline cropped diagram. Also supports hover highlighting and lens view.
+- `<spoiler>`: Collapsible element to hide details. Requires exactly two children: `<preview>` (visible text) and `<content>` (hidden content).
 
 ### Structural Blocks
 
@@ -151,7 +178,7 @@ Note files use an XML-like syntax to map transcriptions to images using a **1000
   - **Agent Tooling**:
     - **Symbol Inspection**: A subcommand `go run ./tool/cmd/autonotes symbols` will provide a CLI interface for agents to list all defined symbols, verify their metadata, and trace their cross-reference graph (where they are used and what they link to).
 
-- [ ] Add a search bar using FuseJS
+- [x] Add a search bar using FuseJS
 
 ---
 
