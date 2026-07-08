@@ -1,0 +1,26 @@
+{
+  "Reviewed Tag": {
+    "scope": "xml,html,plaintext,note",
+    "prefix": "review",
+    "body": ["tags=\"reviewed\""],
+    "description": "Inserts reviewed tag attribute",
+  },
+  "Math Inline": {
+    "scope": "xml,html,plaintext,note",
+    "prefix": "math",
+    "body": ["<math>$1</math>$0"],
+    "description": "Create inline math tag",
+  },
+  "Math Display": {
+    "scope": "xml,html,plaintext,note",
+    "prefix": "mathds",
+    "body": ["<math display=\"true\">", "\t$1", "</math>$0"],
+    "description": "Create display math block",
+  },
+  "Reword": {
+    "scope": "xml,html,plaintext,note",
+    "prefix": "reword",
+    "body": ["<reword>", "\t$1", "</reword>$0"],
+    "description": "Create reword tag",
+  },
+}

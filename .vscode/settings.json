@@ -1,0 +1,20 @@
+{
+  "highlight.regexes": {
+    "(<box\\b[^>]*>[\\s\\S]*?</box>)": {
+      "filterFileRegex": ".*\\.note$",
+      "decorations": [
+        {
+          "opacity": "0.3"
+        }
+      ]
+    },
+    "\\b(?:ref|uid)=\"[^\"]*\"": {
+      "filterFileRegex": ".*\\.note$",
+      "decorations": [
+        {
+          "opacity": "0.3"
+        }
+      ]
+    }
+  }
+}

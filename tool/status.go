@@ -195,7 +195,12 @@ type MathValidator struct {
 func (v *MathValidator) VisitText(n *TextNode) {}
 
 func (v *MathValidator) VisitBlock(n *BlockNode) {
+<<<<<<< HEAD
 	isStatement := n.Name == "theorem" || n.Name == "prop" || n.Name == "proposition" || n.Name == "lemma" || n.Name == "corollary"
+||||||| 5803fd1
+=======
+	isStatement := n.Name == "theorem" || n.Name == "prop" || n.Name == "proposition" || n.Name == "lemma" || n.Name == "corollary" || n.Name == "fact"
+>>>>>>> personal
 	oldStatementName := v.statementName
 	if isStatement {
 		v.statementName = n.Name

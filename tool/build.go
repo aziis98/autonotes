@@ -148,6 +148,25 @@ var BuildCmd = &cobra.Command{
 					if e.Name() == "index.html" || e.Name() == "styles.css" || e.Name() == "app.js" {
 						continue
 					}
+<<<<<<< HEAD
+||||||| 5803fd1
+					link := e.Name()
+					name := e.Name()
+					if e.IsDir() {
+						link += "/"
+=======
+					if e.IsDir() && e.Name() == "images" {
+						continue
+					}
+					if rel == "." {
+						if !e.IsDir() {
+							continue
+						}
+						if e.Name() == "data" {
+							continue
+						}
+					}
+>>>>>>> personal
 					var link string
 					if rel == "." {
 						link = "/" + e.Name()
@@ -362,6 +381,11 @@ func processNoteFile(notePath, outPath string) (template.HTML, []string, []Searc
 		NextPath:      nextPath,
 		NextTitle:     nextTitle,
 		Tags:          tags,
+<<<<<<< HEAD
+||||||| 5803fd1
+=======
+		SourcePath:    filepath.ToSlash(notePath),
+>>>>>>> personal
 	})
 	if err != nil {
 		return "", nil, nil, err
@@ -384,6 +408,7 @@ type HTMLRenderer struct {
 	absDir            string
 	currentImgContext string
 	inMath            bool
+	tagStack          []string
 }
 
 func (r *HTMLRenderer) String() string {
@@ -399,6 +424,11 @@ func (r *HTMLRenderer) VisitText(n *TextNode) {
 }
 
 func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
+	r.tagStack = append(r.tagStack, n.Name)
+	defer func() {
+		r.tagStack = r.tagStack[:len(r.tagStack)-1]
+	}()
+
 	// Image context tracking downward
 	if imgAttr, ok := n.Attributes["image"]; ok {
 		imgName := imgAttr
@@ -412,7 +442,7 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 
 	isBox := n.Name == "box"
 	isMath := n.Name == "math"
-	isTheorem := n.Name == "theorem" || n.Name == "lemma" || n.Name == "definition" || n.Name == "proposition" || n.Name == "corollary" || n.Name == "exercise"
+	isTheorem := n.Name == "theorem" || n.Name == "lemma" || n.Name == "definition" || n.Name == "proposition" || n.Name == "corollary" || n.Name == "exercise" || n.Name == "fact"
 	isImage := n.Name == "image"
 	isListElement := n.Name == "itemize" || n.Name == "enumerate" || n.Name == "item"
 	isInline := n.Name == "strong" || n.Name == "emph" || n.Name == "a"
@@ -487,8 +517,43 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 			refAttr = fmt.Sprintf(` data-ref="%s"`, template.HTMLEscapeString(ref))
 		}
 		fmt.Fprintf(&r.sb, `<div class="reword"%s>`, refAttr)
+		r.renderParagraphWrappedChildren(n.Children)
+		r.sb.WriteString(`</div>`)
+		return
 	} else if n.Name == "summary" {
 		fmt.Fprintf(&r.sb, `<div class="summary-block hidden">`)
+	} else if n.Name == "spoiler" {
+		fmt.Fprintf(&r.sb, `<span class="spoiler">`)
+		
+		preview := n.FindChild("preview")
+		if preview != nil {
+			fmt.Fprintf(&r.sb, `<span class="spoiler-summary">`)
+			for _, child := range preview.Children {
+				child.Accept(r)
+			}
+			fmt.Fprintf(&r.sb, `</span>`)
+		}
+		
+		content := n.FindChild("content")
+		if content != nil {
+			fmt.Fprintf(&r.sb, `<span class="spoiler-content">`)
+			r.renderParagraphWrappedChildren(content.Children)
+			fmt.Fprintf(&r.sb, `</span>`)
+		}
+		
+		var otherChildren []Node
+		for _, child := range n.Children {
+			if bn, ok := child.(*BlockNode); ok && (bn.Name == "preview" || bn.Name == "content") {
+				continue
+			}
+			otherChildren = append(otherChildren, child)
+		}
+		if len(otherChildren) > 0 {
+			r.renderParagraphWrappedChildren(otherChildren)
+		}
+
+		fmt.Fprintf(&r.sb, `</span>`)
+		return
 	} else if isTheorem {
 		idAttr := ""
 		if idVal := n.Attr("id"); idVal != "" {
@@ -533,15 +598,13 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 	}
 	r.inMath = oldInMath
 
-	if (isBox || isTheorem || (n.Name != "root" && n.Name != "section" && !isBox && !isMath && !isTheorem && !isImage && n.Name != "reword" && !isListElement && !isInline)) && n.Name != "math" {
+	if (isBox || isTheorem || (n.Name != "root" && n.Name != "section" && n.Name != "preview" && n.Name != "spoiler" && n.Name != "content" && !isBox && !isMath && !isTheorem && !isImage && n.Name != "reword" && !isListElement && !isInline)) && n.Name != "math" {
 		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "section" {
 		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "math" {
 		fmt.Fprintf(&r.sb, `</span>`)
 	} else if n.Name == "reword" {
-		fmt.Fprintf(&r.sb, `</div>`)
-	} else if n.Name == "summary" {
 		fmt.Fprintf(&r.sb, `</div>`)
 	} else if n.Name == "itemize" {
 		fmt.Fprintf(&r.sb, `</ul>`)
@@ -667,6 +730,7 @@ func collectSearchEntries(node Node, fileSlug string, lessonLink string, course 
 
 	var entries []SearchEntry
 
+<<<<<<< HEAD
 	isSearchable := block.Name == "theorem" || block.Name == "lemma" || block.Name == "definition" || block.Name == "proposition" || block.Name == "corollary"
 	if isSearchable {
 		// Assign ID
@@ -720,4 +784,163 @@ func collectSearchEntries(node Node, fileSlug string, lessonLink string, course 
 	}
 
 	return entries
+||||||| 5803fd1
+=======
+	isSearchable := block.Name == "theorem" || block.Name == "lemma" || block.Name == "definition" || block.Name == "proposition" || block.Name == "corollary" || block.Name == "fact"
+	if isSearchable {
+		// Assign ID
+		uid := block.Attr("id")
+		if uid == "" {
+			uid = block.Attr("uid")
+		}
+		// If not found, look for first box with a uid
+		if uid == "" {
+			for _, child := range block.Children {
+				if cb, ok := child.(*BlockNode); ok && cb.Name == "box" {
+					if buid := cb.Attr("uid"); buid != "" {
+						uid = strings.TrimSuffix(buid, "-box")
+						break
+					}
+				}
+			}
+		}
+		// Fallback to sequential ID
+		if uid == "" {
+			uid = fmt.Sprintf("%s-%d", block.Name, *counter)
+			*counter++
+		}
+		block.Attributes["id"] = uid
+
+		// Extract plain text for searching
+		extractor := &TextExtractor{}
+		block.Accept(extractor)
+		contentText := strings.TrimSpace(extractor.String())
+
+		// Render HTML for display
+		renderer := &HTMLRenderer{absDir: absDir}
+		block.Accept(renderer)
+		contentHTML := renderer.String()
+
+		entries = append(entries, SearchEntry{
+			ID:          uid,
+			Type:        block.Name,
+			LessonTitle: fileSlug,
+			LessonLink:  lessonLink + "#" + uid,
+			Course:      course,
+			Date:        date,
+			ContentText: contentText,
+			ContentHTML: contentHTML,
+		})
+	}
+
+	for _, child := range block.Children {
+		childEntries := collectSearchEntries(child, fileSlug, lessonLink, course, date, absDir, counter)
+		entries = append(entries, childEntries...)
+	}
+
+	return entries
+}
+
+func isInlineNode(n Node) bool {
+	bn, ok := n.(*BlockNode)
+	if !ok {
+		return true // TextNode is inline
+	}
+	if bn.Name == "strong" || bn.Name == "emph" || bn.Name == "a" || bn.Name == "spoiler" {
+		return true
+	}
+	if bn.Name == "math" && bn.Attr("display") != "true" {
+		return true
+	}
+	return false
+}
+
+func splitDoubleNewlines(s string) []string {
+	normalized := strings.ReplaceAll(s, "\r\n", "\n")
+	lines := strings.Split(normalized, "\n")
+	var parts []string
+	var currentPart []string
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			if len(currentPart) > 0 {
+				parts = append(parts, strings.Join(currentPart, "\n"))
+				currentPart = nil
+			}
+			parts = append(parts, "")
+		} else {
+			currentPart = append(currentPart, line)
+		}
+	}
+	if len(currentPart) > 0 {
+		parts = append(parts, strings.Join(currentPart, "\n"))
+	}
+	return parts
+}
+
+func (r *HTMLRenderer) renderParagraphWrappedChildren(children []Node) {
+	var currentP *strings.Builder = nil
+
+	closeP := func() {
+		if currentP != nil {
+			r.sb.WriteString(currentP.String())
+			r.sb.WriteString(`</div>`)
+			currentP = nil
+		}
+	}
+
+	openP := func() {
+		if currentP == nil {
+			currentP = &strings.Builder{}
+			currentP.WriteString(`<div class="reword-paragraph">`)
+		}
+	}
+
+	for _, child := range children {
+		if isInlineNode(child) {
+			if txt, ok := child.(*TextNode); ok {
+				if strings.Contains(txt.Content, "\n\n") || strings.Contains(txt.Content, "\r\n\r\n") {
+					parts := splitDoubleNewlines(txt.Content)
+					for i, part := range parts {
+						if strings.TrimSpace(part) == "" {
+							if i > 0 && i < len(parts)-1 {
+								closeP()
+							}
+							continue
+						}
+						if i > 0 {
+							closeP()
+						}
+						openP()
+						currentP.WriteString(template.HTMLEscapeString(part))
+					}
+				} else {
+					if strings.TrimSpace(txt.Content) == "" && currentP == nil {
+						continue
+					}
+					openP()
+					currentP.WriteString(template.HTMLEscapeString(txt.Content))
+				}
+			} else {
+				openP()
+				subRenderer := &HTMLRenderer{absDir: r.absDir, currentImgContext: r.currentImgContext, inMath: r.inMath}
+				child.Accept(subRenderer)
+				currentP.WriteString(subRenderer.String())
+			}
+		} else {
+			closeP()
+			isDisplayMath := false
+			if bn, ok := child.(*BlockNode); ok && bn.Name == "math" && bn.Attr("display") == "true" {
+				isDisplayMath = true
+			}
+			if isDisplayMath {
+				r.sb.WriteString(`<div class="reword-paragraph">`)
+			}
+			child.Accept(r)
+			if isDisplayMath {
+				r.sb.WriteString(`</div>`)
+			}
+		}
+	}
+	closeP()
+>>>>>>> personal
 }

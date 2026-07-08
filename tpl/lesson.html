@@ -18,6 +18,7 @@
           ],
           macros: {
             coloneqq: ":=",
+            fcmp: "\\mathbin{\\hspace-0.125ex\\style{font-size:1.3em}{\\unicode{x2A3E}}\\hspace-0.125ex}",
           },
           packages: { "[+]": ["ams", "amscd"] },
         },
@@ -38,7 +39,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Recursive:wght@300..1000&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{.StaticPath}}styles.css" />
@@ -47,7 +48,7 @@
       {{.Debug}}
     </script>
   </head>
-  <body>
+  <body data-source-path="{{.SourcePath}}">
     <header class="main-header">
       <nav class="breadcrumb-nav">
         {{range $i, $crumb := .Breadcrumbs}} {{if $i}}<span class="separator"
@@ -87,6 +88,28 @@
         >
           <i data-lucide="brick-wall" size="18"></i>
         </button>
+        <button
+          id="toggle-lens"
+          class="brutal-button icon"
+          title="Toggle Bottom Lens"
+        >
+          <i data-lucide="panel-bottom-close" size="18"></i>
+        </button>
+        <button
+          id="toggle-rewords-focus"
+          class="brutal-button icon"
+          title="Study Repeat Mode"
+        >
+          <i data-lucide="list-indent-increase" size="18"></i>
+        </button>
+        <button
+          id="open-source"
+          class="brutal-button icon"
+          title="Open Source File"
+          style="display: none;"
+        >
+          <i data-lucide="file-text" size="18"></i>
+        </button>
         <button id="toggle-preview" class="brutal-button preview-toggle">
           Toggle Images
         </button>
@@ -96,7 +119,26 @@
     <main class="split-pane">
       <!-- Left Column: Transcription -->
       <article id="left-column">
+        <div id="reword-focus-indicator">
+          <i data-lucide="arrow-right" size="24"></i>
+        </div>
         <div class="content-wrapper">
+          {{if or .PrevPath .NextPath}}
+          <div class="lesson-nav-buttons top">
+            {{if .PrevPath}}
+            <a href="{{.PrevPath}}" class="brutal-button prev-button">
+              <i data-lucide="chevron-left" size="16"></i> {{.PrevTitle}}
+            </a>
+            {{else}}
+            <div></div>
+            {{end}} {{if .NextPath}}
+            <a href="{{.NextPath}}" class="brutal-button next-button">
+              {{.NextTitle}} <i data-lucide="chevron-right" size="16"></i>
+            </a>
+            {{end}}
+          </div>
+          {{end}}
+
           <div class="lesson-header-row">
             <h1 class="lesson-title">{{.Title}}</h1>
             {{if .Tags}}
@@ -107,9 +149,11 @@
             </div>
             {{end}}
           </div>
+
           {{if .Summary}}
           <div class="lesson-summary-card">{{.Summary}}</div>
           {{end}}
+
           <div class="note-content">{{.Content}}</div>
 
           {{if or .PrevPath .NextPath}}

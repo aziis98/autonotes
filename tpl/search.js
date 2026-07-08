@@ -105,16 +105,52 @@ function renderAllResults(entries) {
     const mathElements = container.querySelectorAll(
       "span.math:not([data-rendered])",
     );
-    mathElements.forEach((el) => {
-      let content = el.textContent;
-      // Strip out "larger than normal" size directives
-      content = content.replace(/\\(large|Large|LARGE|huge|Huge)\b\s*/g, "");
-      // Render all math as inline
-      el.textContent = `\\(${content}\\)`;
-      el.dataset.rendered = "true";
-    });
+    if (mathElements.length > 0) {
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            const toTypeset = [];
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const el = entry.target;
+                obs.unobserve(el);
 
-    window.MathJax.typesetPromise([container]);
+                let content = el.textContent;
+                // Strip out "larger than normal" size directives
+                content = content.replace(/\\(large|Large|LARGE|huge|Huge)\b\s*/g, "");
+                // Render all math as inline
+                el.textContent = `\\(${content}\\)`;
+                el.dataset.rendered = "true";
+                toTypeset.push(el);
+              }
+            });
+            if (toTypeset.length > 0) {
+              window.MathJax.typesetPromise(toTypeset).catch((err) => {
+                console.error("MathJax typeset error:", err);
+              });
+            }
+          },
+          {
+            rootMargin: "200px 0px", // Pre-render slightly before they scroll into view
+          }
+        );
+
+        mathElements.forEach((el) => {
+          observer.observe(el);
+        });
+      } else {
+        // Fallback if IntersectionObserver is not supported
+        mathElements.forEach((el) => {
+          let content = el.textContent;
+          content = content.replace(/\\(large|Large|LARGE|huge|Huge)\b\s*/g, "");
+          el.textContent = `\\(${content}\\)`;
+          el.dataset.rendered = "true";
+        });
+        window.MathJax.typesetPromise([container]).catch((err) => {
+          console.error("MathJax typeset error:", err);
+        });
+      }
+    }
   }
 }
 

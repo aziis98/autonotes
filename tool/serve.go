@@ -173,6 +173,18 @@ var ServeCmd = &cobra.Command{
 			}
 		})
 
+		// CWD Endpoint
+		mux.HandleFunc("/cwd", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/plain")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			cwd, err := os.Getwd()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprint(w, filepath.ToSlash(cwd))
+		})
+
 		// File Server with injection
 		fileServer := http.FileServer(http.Dir("out"))
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

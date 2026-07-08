@@ -18,6 +18,14 @@ const allBoxesOverlay = document.getElementById("all-boxes-overlay");
  * Update the high-resolution crop preview (The Lens)
  */
 export function updateLens(imgSrc, top, right, bottom, left) {
+  if (document.body.classList.contains("lens-hidden")) {
+    if (lensContainer) {
+      lensContainer.classList.add("hidden");
+      lensContainer.style.display = "none";
+    }
+    return;
+  }
+
   if (!lensContainer || !imgSrc || isNaN(top)) {
     if (lensContainer) lensContainer.classList.add("hidden");
     return;
@@ -124,6 +132,14 @@ export function clearHighlight() {
   }
 }
 
+function getBoxTarget(id) {
+  if (!id) return null;
+  const query = `.box-text[id="${id}"], .inline-image-crop[id="${id}"]`;
+  const boxTarget = document.querySelector(query);
+  if (boxTarget) return boxTarget;
+  return document.getElementById(id);
+}
+
 // Initial Bootstrap
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
@@ -215,6 +231,250 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Lens Toggle
+  const toggleLens = document.getElementById("toggle-lens");
+  if (toggleLens) {
+    function updateLensIcon(hidden) {
+      const iconName = hidden ? "panel-bottom-open" : "panel-bottom-close";
+      toggleLens.innerHTML = `<i data-lucide="${iconName}" size="18"></i>`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    const isHidden = localStorage.getItem("lens-hidden") === "true";
+    if (isHidden) {
+      body.classList.add("lens-hidden");
+    }
+    toggleLens.classList.toggle("active", !isHidden);
+    updateLensIcon(isHidden);
+
+    toggleLens.addEventListener("click", () => {
+      const nowHidden = body.classList.toggle("lens-hidden");
+      localStorage.setItem("lens-hidden", nowHidden);
+      toggleLens.classList.toggle("active", !nowHidden);
+      updateLensIcon(nowHidden);
+      if (nowHidden && lensContainer) {
+        lensContainer.classList.add("hidden");
+        lensContainer.style.display = "none";
+      }
+    });
+  }
+
+  // Reword Focus Toggle
+  const toggleRewordsFocus = document.getElementById("toggle-rewords-focus");
+  if (toggleRewordsFocus) {
+    const isActive = localStorage.getItem("rewords-focus") === "true";
+    if (isActive) {
+      body.classList.add("rewords-focus");
+      setTimeout(focusElementAtCenter, 200);
+    }
+    toggleRewordsFocus.classList.toggle("active", isActive);
+
+    toggleRewordsFocus.addEventListener("click", () => {
+      const nowActive = body.classList.toggle("rewords-focus");
+      localStorage.setItem("rewords-focus", nowActive);
+      toggleRewordsFocus.classList.toggle("active", nowActive);
+      if (nowActive) {
+        focusElementAtCenter();
+      } else {
+        clearRewordsFocus();
+      }
+    });
+  }
+
+  function focusElementAtCenter() {
+    const readingElements = Array.from(
+      document.querySelectorAll(
+        "#left-column .reword-paragraph, #left-column li",
+      ),
+    );
+    if (readingElements.length === 0) return;
+
+    const centerY = window.innerHeight / 2;
+    let closestElement = null;
+    let minDistance = Infinity;
+
+    readingElements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const elementCenterY = rect.top + rect.height / 2;
+      const distance = Math.abs(elementCenterY - centerY);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestElement = el;
+      }
+    });
+
+    if (closestElement) {
+      applyFocusFading(closestElement);
+      updateIndicatorPosition();
+    }
+  }
+
+  function updateIndicatorPosition() {
+    const focused = document.querySelector(".focused-reading-element");
+    const indicator = document.getElementById("reword-focus-indicator");
+    if (!focused || !indicator) {
+      if (indicator) indicator.classList.remove("visible");
+      return;
+    }
+    const leftColumn = document.getElementById("left-column");
+    const targetRect = focused.getBoundingClientRect();
+    const columnRect = leftColumn.getBoundingClientRect();
+
+    const top = targetRect.top - columnRect.top + leftColumn.scrollTop;
+    // Center vertically with the line of text/box (indicator height is 32px)
+    const heightOffset = (targetRect.height - 32) / 2;
+
+    // Align horizontally with the main content wrapper's left edge
+    const wrapper = document.querySelector(".content-wrapper");
+    const wrapperRect = wrapper ? wrapper.getBoundingClientRect() : targetRect;
+    const left = wrapperRect.left - columnRect.left - 45; // 45px to the left of content wrapper
+
+    indicator.style.top = top + heightOffset + "px";
+    indicator.style.left = left + "px";
+    indicator.classList.add("visible");
+  }
+
+  function clearRewordsFocus() {
+    document.querySelectorAll(".focused-reading-element").forEach((el) => {
+      el.classList.remove("focused-reading-element");
+    });
+    document.querySelectorAll(".faded-reading-element").forEach((el) => {
+      el.classList.remove("faded-reading-element");
+    });
+    const indicator = document.getElementById("reword-focus-indicator");
+    if (indicator) {
+      indicator.classList.remove("visible");
+    }
+  }
+
+  function applyFocusFading(target) {
+    document.querySelectorAll(".faded-reading-element").forEach((el) => {
+      el.classList.remove("faded-reading-element");
+    });
+    document.querySelectorAll(".focused-reading-element").forEach((el) => {
+      el.classList.remove("focused-reading-element");
+    });
+
+    if (!target) return;
+
+    target.classList.add("focused-reading-element");
+
+    const candidates = Array.from(
+      document.querySelectorAll(
+        "#left-column .reword-paragraph, #left-column li, #left-column .theorem, #left-column .lemma, #left-column .definition, #left-column .proposition, #left-column .corollary, #left-column .dim, #left-column .fact, #left-column .inline-image-crop, #left-column .box-text",
+      ),
+    );
+
+    candidates.forEach((el) => {
+      if (el === target) return;
+
+      const position = target.compareDocumentPosition(el);
+      if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+        if (el.contains(target)) return;
+        el.classList.add("faded-reading-element");
+      }
+    });
+  }
+
+  const leftColumn = document.getElementById("left-column");
+  if (leftColumn) {
+    leftColumn.addEventListener("click", (e) => {
+      if (!body.classList.contains("rewords-focus")) return;
+
+      // Don't intercept clicks on links
+      if (e.target.closest("a")) return;
+
+      const target = e.target.closest(".reword-paragraph, #left-column li");
+      if (!target) return;
+
+      e.stopPropagation();
+
+      if (target.classList.contains("focused-reading-element")) {
+        return;
+      }
+      applyFocusFading(target);
+      updateIndicatorPosition();
+    });
+  }
+
+  window.addEventListener("resize", updateIndicatorPosition);
+
+  // Keyboard Navigation for Reword Focus
+  window.addEventListener("keydown", (e) => {
+    if (!body.classList.contains("rewords-focus")) return;
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      body.classList.remove("rewords-focus");
+      localStorage.setItem("rewords-focus", "false");
+      const toggleRewordsFocus = document.getElementById(
+        "toggle-rewords-focus",
+      );
+      if (toggleRewordsFocus) {
+        toggleRewordsFocus.classList.remove("active");
+      }
+      clearRewordsFocus();
+      return;
+    }
+
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+
+    // Ignore if typing in inputs/textareas
+    if (
+      document.activeElement &&
+      (document.activeElement.tagName === "INPUT" ||
+        document.activeElement.tagName === "TEXTAREA" ||
+        document.activeElement.isContentEditable)
+    ) {
+      return;
+    }
+
+    const readingElements = Array.from(
+      document.querySelectorAll(
+        "#left-column .reword-paragraph, #left-column li",
+      ),
+    );
+    if (readingElements.length === 0) return;
+
+    e.preventDefault();
+
+    const focused = document.querySelector(".focused-reading-element");
+    let nextIndex = 0;
+
+    if (focused) {
+      const currentIndex = readingElements.indexOf(focused);
+      if (e.key === "ArrowUp") {
+        nextIndex = currentIndex - 1;
+      } else {
+        nextIndex = currentIndex + 1;
+      }
+    } else {
+      if (e.key === "ArrowUp") {
+        nextIndex = readingElements.length - 1;
+      } else {
+        nextIndex = 0;
+      }
+    }
+
+    // Boundary check
+    if (nextIndex >= 0 && nextIndex < readingElements.length) {
+      const newTarget = readingElements[nextIndex];
+
+      // Open parent details if closed
+      let parent = newTarget.parentElement;
+      while (parent) {
+        if (parent.tagName === "DETAILS" && !parent.open) {
+          parent.open = true;
+        }
+        parent = parent.parentElement;
+      }
+
+      applyFocusFading(newTarget);
+      updateIndicatorPosition();
+      newTarget.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  });
+
   // Listen for system theme changes if set to system
   window
     .matchMedia("(prefers-color-scheme: dark)")
@@ -262,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
           hl.style.width = ((r - l) / 1000) * rectW + "px";
           hl.style.height = ((b - t) / 1000) * rectH + "px";
           hl.style.pointerEvents = "auto";
-          hl.style.cursor = "pointer";
+          hl.style.cursor = "alias";
 
           hl.addEventListener("click", () => {
             let targetEl = box;
@@ -317,13 +577,255 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (imgEl) {
     imgEl.addEventListener("load", updateAllBoxesHighlights);
+
+    imgEl.addEventListener("click", () => {
+      // Don't open if we're in inspect mode
+      if (body.classList.contains("inspect-mode")) return;
+
+      const modalOverlay = document.createElement("div");
+      modalOverlay.className = "image-modal-overlay";
+
+      const modalContainer = document.createElement("div");
+      modalContainer.className = "image-modal-container";
+
+      const imgWrapper = document.createElement("div");
+      imgWrapper.className = "image-modal-img-wrapper";
+
+      const modalImg = document.createElement("img");
+      modalImg.className = "image-modal-img";
+      modalImg.src = imgEl.src;
+
+      const modalInspectOverlay = document.createElement("div");
+      modalInspectOverlay.className = "image-modal-inspector-overlay hidden";
+
+      const modalInspectSelection = document.createElement("div");
+      modalInspectSelection.className = "image-modal-inspector-selection";
+
+      modalInspectOverlay.appendChild(modalInspectSelection);
+      imgWrapper.appendChild(modalImg);
+      imgWrapper.appendChild(modalInspectOverlay);
+
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "brutal-button icon modal-close-btn";
+      closeBtn.innerHTML = `<i data-lucide="x" size="18"></i>`;
+      closeBtn.title = "Close Image";
+
+      const inspectBtn = document.createElement("button");
+      inspectBtn.className = "brutal-button icon modal-inspect-btn";
+      inspectBtn.innerHTML = `<i data-lucide="crosshair" size="18"></i>`;
+      inspectBtn.title = "Inspect Region";
+
+      const actionsBar = document.createElement("div");
+      actionsBar.className = "image-modal-actions-bar";
+      actionsBar.appendChild(closeBtn);
+      actionsBar.appendChild(inspectBtn);
+
+      const contentWrapper = document.createElement("div");
+      contentWrapper.className = "image-modal-content-wrapper";
+      contentWrapper.appendChild(imgWrapper);
+      contentWrapper.appendChild(actionsBar);
+
+      modalContainer.appendChild(contentWrapper);
+      modalOverlay.appendChild(modalContainer);
+      document.body.appendChild(modalOverlay);
+
+      // Initialize Lucide icons
+      if (window.lucide) window.lucide.createIcons();
+
+      // Prevent body scrolling while modal is open
+      document.body.style.overflow = "hidden";
+
+      const closeModal = () => {
+        modalOverlay.remove();
+        document.body.style.overflow = "";
+      };
+
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay || e.target === modalContainer) {
+          closeModal();
+        }
+      });
+
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeModal();
+      });
+
+      // Drag/Inspect Logic
+      let modalIsDragging = false;
+      let modalStartX = 0;
+      let modalStartY = 0;
+
+      inspectBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const active = modalInspectOverlay.classList.toggle("hidden");
+        inspectBtn.classList.toggle("active", !active);
+        if (active) {
+          modalInspectSelection.style.display = "none";
+        }
+      });
+
+      modalInspectOverlay.addEventListener("mousedown", (e) => {
+        e.stopPropagation();
+        modalIsDragging = true;
+        const rect = modalInspectOverlay.getBoundingClientRect();
+        modalStartX = e.clientX - rect.left;
+        modalStartY = e.clientY - rect.top;
+
+        modalInspectSelection.style.left = modalStartX + "px";
+        modalInspectSelection.style.top = modalStartY + "px";
+        modalInspectSelection.style.width = "0px";
+        modalInspectSelection.style.height = "0px";
+        modalInspectSelection.style.display = "block";
+      });
+
+      modalInspectOverlay.addEventListener("mousemove", (e) => {
+        if (!modalIsDragging) return;
+        e.stopPropagation();
+
+        const rect = modalInspectOverlay.getBoundingClientRect();
+        const currentX = Math.max(
+          0,
+          Math.min(rect.width, e.clientX - rect.left),
+        );
+        const currentY = Math.max(
+          0,
+          Math.min(rect.height, e.clientY - rect.top),
+        );
+
+        const x = Math.min(modalStartX, currentX);
+        const y = Math.min(modalStartY, currentY);
+        const w = Math.abs(currentX - modalStartX);
+        const h = Math.abs(currentY - modalStartY);
+
+        modalInspectSelection.style.left = x + "px";
+        modalInspectSelection.style.top = y + "px";
+        modalInspectSelection.style.width = w + "px";
+        modalInspectSelection.style.height = h + "px";
+      });
+
+      modalInspectOverlay.addEventListener("mouseup", (e) => {
+        if (!modalIsDragging) return;
+        e.stopPropagation();
+        modalIsDragging = false;
+
+        const rect = modalInspectOverlay.getBoundingClientRect();
+        const selRect = modalInspectSelection.getBoundingClientRect();
+
+        const top = Math.round(((selRect.top - rect.top) / rect.height) * 1000);
+        const left = Math.round(
+          ((selRect.left - rect.left) / rect.width) * 1000,
+        );
+        const bottom = Math.round(
+          ((selRect.bottom - rect.top) / rect.height) * 1000,
+        );
+        const right = Math.round(
+          ((selRect.right - rect.left) / rect.width) * 1000,
+        );
+
+        const imgSrc = imgEl.src.split("/").pop();
+        const tag = `<image src="${imgSrc}" top=${top} right=${right} bottom=${bottom} left=${left} />`;
+
+        navigator.clipboard.writeText(tag).then(() => {
+          const originalHTML = inspectBtn.innerHTML;
+          inspectBtn.innerHTML = `<i data-lucide="check" size="18"></i>`;
+          if (window.lucide) window.lucide.createIcons();
+
+          setTimeout(() => {
+            inspectBtn.innerHTML = originalHTML;
+            if (window.lucide) window.lucide.createIcons();
+
+            modalInspectOverlay.classList.add("hidden");
+            inspectBtn.classList.remove("active");
+            modalInspectSelection.style.display = "none";
+          }, 500);
+        });
+      });
+
+      // Add keyboard close (Escape)
+      const escHandler = (e) => {
+        if (e.key === "Escape") {
+          closeModal();
+          document.removeEventListener("keydown", escHandler);
+        }
+      };
+      document.addEventListener("keydown", escHandler);
+    });
   }
   window.addEventListener("resize", updateAllBoxesHighlights);
+
+  // Add icon to content links
+  document.querySelectorAll("#left-column .note-content a").forEach((a) => {
+    const href = a.getAttribute("href") || "";
+    if (!a.querySelector(".link-icon")) {
+      const isExternal =
+        href.startsWith("http://") || href.startsWith("https://");
+      const iconName = isExternal ? "external-link" : "link";
+      const icon = document.createElement("span");
+      icon.className = "link-icon";
+      icon.innerHTML = `<i data-lucide="${iconName}" size="12"></i>`;
+      a.prepend(icon);
+    }
+  });
+
+  // Open Source File button logic (if dev server /cwd endpoint is available)
+  fetch("/cwd")
+    .then((res) => {
+      if (res.ok) {
+        return res.text();
+      }
+      throw new Error("Not connected to dev server");
+    })
+    .then((cwd) => {
+      const openSourceBtn = document.getElementById("open-source");
+      if (openSourceBtn) {
+        openSourceBtn.style.display = "inline-flex";
+        if (window.lucide) window.lucide.createIcons();
+        openSourceBtn.addEventListener("click", () => {
+          const sourcePath =
+            document.body.getAttribute("data-source-path") || "";
+          const url = `antigravity-ide://file/${cwd.trim()}/${sourcePath}`;
+          window.location.href = url;
+        });
+      }
+    })
+    .catch((err) => {
+      if (window.DEBUG) {
+        console.log("CWD endpoint not available:", err);
+      }
+    });
 
   // Initialize Lucide Icons
   if (window.lucide) {
     window.lucide.createIcons();
   }
+
+  // Spoiler +/- Lucide Icon Management
+  document.querySelectorAll(".spoiler").forEach((spoiler) => {
+    const summary = spoiler.querySelector(".spoiler-summary");
+    if (!summary) return;
+
+    let iconContainer = summary.querySelector(".spoiler-icon");
+    if (!iconContainer) {
+      iconContainer = document.createElement("span");
+      iconContainer.className = "spoiler-icon";
+      summary.prepend(iconContainer);
+    }
+
+    const updateIcon = () => {
+      const isOpen = spoiler.classList.contains("open");
+      const iconName = isOpen ? "square-minus" : "square-plus";
+      iconContainer.innerHTML = `<i data-lucide="${iconName}" size="14"></i>`;
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    updateIcon();
+    
+    summary.addEventListener("click", () => {
+      spoiler.classList.toggle("open");
+      updateIcon();
+    });
+  });
 
   // Delegation for Hover Events
   body.addEventListener("mouseover", (e) => {
@@ -367,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let foundAny = false;
 
         ids.forEach((id) => {
-          const target = document.getElementById(id);
+          const target = getBoxTarget(id);
           if (target) {
             target.classList.add("box-highlight-green");
 
@@ -409,7 +911,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const refs = reword.getAttribute("data-ref");
         if (refs) {
           refs.split(" ").forEach((id) => {
-            const target = document.getElementById(id);
+            const target = getBoxTarget(id);
             if (target) {
               target.classList.remove("box-highlight-green");
             }
@@ -420,13 +922,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function scrollToHash(behavior = "auto") {
+    const hash = window.location.hash;
+    if (hash) {
+      try {
+        const target = document.querySelector(hash);
+        if (target) {
+          target.scrollIntoView({ block: "center", behavior: behavior });
+        }
+      } catch (err) {
+        console.error("Failed to scroll to hash:", err);
+      }
+    }
+  }
+
   // MathJax Autorender
   function renderMath() {
     if (window.MathJax && window.MathJax.typesetPromise) {
       const mathElements = document.querySelectorAll(
         "span.math:not([data-rendered])",
       );
-      if (mathElements.length === 0) return;
+      if (mathElements.length === 0) {
+        scrollToHash("auto");
+        return;
+      }
 
       mathElements.forEach((el) => {
         const display = el.getAttribute("data-display") === "true";
@@ -435,7 +954,9 @@ document.addEventListener("DOMContentLoaded", () => {
         el.dataset.rendered = "true";
       });
 
-      window.MathJax.typesetPromise();
+      window.MathJax.typesetPromise().then(() => {
+        scrollToHash("auto");
+      });
     } else {
       // If MathJax is not yet available, try again shortly
       setTimeout(renderMath, 100);
@@ -444,10 +965,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Call renderMath on load
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", renderMath);
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMath();
+      scrollToHash("auto");
+    });
   } else {
     renderMath();
+    scrollToHash("auto");
   }
+
+  window.addEventListener("hashchange", () => {
+    scrollToHash("smooth");
+  });
+
+  window.addEventListener("load", () => {
+    scrollToHash("auto");
+  });
 
   // Inline Image Crops
   // Sizing configuration constants:
@@ -552,7 +1085,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const refs = closest.getAttribute("data-ref");
           if (refs) {
             const firstId = refs.split(" ")[0];
-            const target = document.getElementById(firstId);
+            const target = getBoxTarget(firstId);
             if (target) {
               imgSrc =
                 target.getAttribute("data-img") || target.getAttribute("src");
@@ -566,8 +1099,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (allBoxesOverlay) allBoxesOverlay.innerHTML = "";
           imgEl.src = imgSrc;
         }
-
-        updateAllBoxesHighlights();
       }
     }
   });

@@ -29,13 +29,15 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
 6. **Rewording**: It is mandatory to provide a formal, professional mathematical rewrite of the transcribed text. Use `<reword>...</reword>` blocks to contain this formal version. These blocks can be used as children of semantic wrappers (like `<theorem>`) or placed freely at the top-level for more general commentary. The renderer styles these with a textbook-like appearance (serif font, gray border).
    - **Fidelity**: The `<reword>` block MUST follow the original handwritten text closely. Do not remove any information present in the source `<box>` tags. The goal is to make the content readable and grammatically correct by adding minimal connectives and formal formatting, while preserving 100% of the mathematical and logical substance.
-   - Within `<reword>`, start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Theorem (Name).</strong>` or `<strong>Definition.</strong>`). Always use the English terminology: **Theorem**, **Definition**, **Proposition**, **Lemma**, **Corollary**, **Exercise**, **Proof**, **Example**, **Remark**, **Note**.
+   - Within `<reword>` blocks that correspond to semantic wrappers (e.g. inside `<theorem>`, `<lemma>`), start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Teorema (Nome).</strong>` or `<strong>Definizione.</strong>`). Always use the Italian terminology to match the source notes: **Teorema**, **Definizione**, **Proposizione**, **Lemma**, **Corollario**, **Esercizio**, **Dimostrazione**, **Esempio**, **Nota** / **Osservazione**.
+   - **No Strong Labels for Normal Paragraphs / Previews**: Do NOT start normal paragraphs (top-level rewords) or `<preview>` blocks with strong labels (e.g. `<strong>Definizione di f.</strong>` or `<strong>Note (Embedding).</strong>`). Keep a more classical, continuous text flow instead.
 
 7. **Lists**: Use `<itemize>` or `<enumerate>` for bulleted or numbered lists, placing each entry inside an `<item>...</item>` tag.
 
 8. **Mathematical Equations**: Enclose any inline or block math using the `<math>...</math>` tag using standard LaTeX expressions (e.g., `<math>1+\frac{1}{2}</math>`). You can also use `<math display="true">...</math>` for display block rendering via KaTeX.
+   - **MANDATORY RULE**: Be extremely careful when closing LaTeX environments (e.g., `\end{aligned}`, `\end{matrix}`). Avoid writing `\end{aligned>` or similar with a greater-than sign (`>`) instead of a curly brace (`}`). This is a common LLM mistake caused by XML/HTML tag auto-completion logic. Always verify that all LaTeX environment tags are closed with proper curly braces.
 
-9. **Verify Elements**: Use semantic wrappers such as `<theorem>`, `<lemma>`, `<definition>`, `<recall>`, `<remark>`, `<proof>`.
+9. **Verify Elements**: Use semantic wrappers such as `<theorem>`, `<lemma>`, `<definition>`, `<recall>`, `<remark>`, `<proof>`, `<fact>` (for osservazioni).
 
 10. **Complex Diagrams**: For complex commutative diagrams or structures that are difficult to reproduce accurately with LaTeX, prefer using an `<image>` tag to crop the original handwritten version directly. Place the `<image>` tag as a sibling to the `<reword>` block within the appropriate semantic wrapper.
 
@@ -44,6 +46,8 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 12. **Inline Formatting**: Use `<strong>...</strong>` for bold text and `<emph>...</emph>` for emphasis (italics). Do not use markdown-style `**...**` or `*...*` expressions, as the renderer requires explicit tags for inline styling.
 
 13. **Lesson Summary**: Include an optional `<summary>...</summary>` block at the very beginning of the `.note` file. This block should contain a very short and concise but comprehensive summary of the lesson (2-4 phrases), in the source language of the notes. This summary is used as a description in the dashboard view. **IMPORTANT: when generating or updating a summary, you MUST read the entire `.note` file first to ensure the summary covers all main topics of the lesson. Avoid using unnecessary connectives and keep the style extremely telegraphic and direct.**
+
+14. **Cross-References / Links**: When linking to definitions, theorems, or other sections in another `.note` file, place the `<a href="...">` tag directly on the descriptive/meaningful text (e.g. `<a href="...">agisce sulle derivazioni</a>` or `<a href="...">embedding liscio</a>`) rather than on generic labels or connectives like "in questo richiamo" or "qui".
 
 ## Note Language
 
@@ -70,6 +74,8 @@ Make sure:
 
 - **Summary Position**: The `<summary>` tag should always be the first element inside the `<lesson>` tag. It can contain `<math>` tags and other inline formatting tags if necessary.
 
+- **Title Attribute**: The `title` attribute is only valid on `<section>` blocks (e.g. `<section title="My Section">`). Do NOT use `title` on other elements like `<definition>`, `<theorem>`, `<fact>`, `<example>`, or `<proof>`. Instead, specify any names or titles directly within the `<strong>` tag inside the corresponding `<reword>` block (e.g., `<strong>Definizione (Pull-back).</strong>`).
+
 - **High Spatial Precision**: Each box must be manually or agent-aligned to its specific pixels. Avoid rounding to the same values as nearby boxes if those values are not accurate. **Prefer slightly larger, inclusive bounds over very tight ones to ensure the cited content is fully contained within the box.**
 
 - **Unique Identifiers (UIDs)**: Every `<box>` tag MUST have a `uid` attribute containing a short, human-readable identifier (e.g. `uid="thm-frobenius-box"`). This allows other elements to reference specific transcription blocks.
@@ -84,6 +90,30 @@ Make sure:
 - **Interspersing**: For long content (e.g., long proofs or detailed examples), avoid creating a single massive block of `<box>` tags followed by a single massive `<reword>` block. Instead, **intersperse** smaller pairs of `<box>` and `<reword>` blocks. Ideally, each `<reword>` block should correspond to roughly one paragraph in the generated HTML. This makes the document easier to navigate and improves the visual connection between specific handwritten fragments and their corresponding formal transcription.
 
 - **No HTML Comments**: Do NOT write HTML comments (e.g. `<!-- comment -->`) inside `.note` files, as they are not supported/desired.
+
+- **No Line Breaks (`<br>` / `<br />`)**: Do NOT use `<br>` or `<br />` tags inside `.note` files (especially inside `<reword>` blocks) to force line breaks. Instead, split the text into multiple separate `<reword>` blocks. This aligns with the interactive design where each `<reword>` block corresponds to roughly one paragraph.
+
+- **Collapsible Spoilers**: You can hide details (like proofs, checks, or step-by-step constructions) using `<spoiler>` blocks. A `<spoiler>` block MUST contain exactly two children: first a `<preview>` tag containing the visible text, and second a `<content>` tag containing the collapsible hidden text.
+  - **Inline Flow Convention**: The `<preview>` tag MUST show text in a normal inline flow (e.g., starting a statement or sentence naturally) rather than acting as a descriptive summary of the hidden content. Do not start the `<preview>` block with a bold label.
+  - **Punctuation & Flow Rules**:
+    - **Continuation case**: If the hidden content continues the sentence from the preview, the punctuation ending the preview clause (e.g., a comma or semicolon) MUST be placed at the end of the `<preview>` block. The `<content>` block must start directly with the continuing word, with absolutely no leading spaces or punctuation (e.g., `<preview>my preview,</preview><content> which is...</content>`).
+    - **New Sentence case**: If the hidden content starts a new sentence/phrase, the period (or other sentence-ending punctuation) MUST be placed at the end of the `<preview>` block. The `<content>` block must start directly with the capitalized first word of the new sentence, with absolutely no leading spaces or dots (e.g., `<preview>my preview.</preview><content>Indeed, we have...</content>`).
+  - **No Leading Spaces**: The text inside `<content>` must start immediately with the first character, without any leading spaces (e.g., `<content>Indeed` or `<content>indeed`). The space separating the spoiler block from the subsequent text should be placed immediately after the closing `</spoiler>` tag.
+  - **Nesting**: `<spoiler>` blocks can be nested within each other or inside other wrappers.
+    Example (New Sentence Case):
+    ```xml
+    Per costruzione, <spoiler>
+      <preview>tale distribuzione è sinistra-invariante.</preview>
+      <content>Infatti, per ogni...</content>
+    </spoiler> Scegliendo...
+    ```
+    Example (Continuation Case):
+    ```xml
+    ... e <spoiler>
+      <preview>estendendo tali vettori a campi sinistra-invarianti <math>\{X_i\}</math>,</preview>
+      <content>definiti ponendo <math>X_i(g) \coloneqq \mathrm d(L_g)_e(v_i)</math></content>
+    </spoiler> otteniamo...
+    ```
 
 ## The `cards/` folder
 
