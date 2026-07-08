@@ -12,6 +12,12 @@ The result is an HTML visualization where everything is first transcribed as is 
 
 As models are also able to recognize math notation and figures in the image, we also get for free a tool that automatically inserts them in the transcribed text.
 
+<p align="center">
+  <a href="https://drop-7e98703f-0ac.antonio-delucreziis.workers.dev/ist-geom/lesson-2026-04-01">
+    <img src="docs/demo-button.svg" alt="View Live Interactive Demo" width="320">
+  </a>
+</p>
+
 ## Interactive Fuzzy Search (New!)
 
 <img src="docs/new-search-page.png" alt="AutoNotes Search Page" width="320" align="right" style="margin-left: 20px; border: 2px solid #1a1a1a; box-shadow: 4px 4px 0px #000000;">
