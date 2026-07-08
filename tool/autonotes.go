@@ -67,9 +67,5 @@ type LessonData struct {
 	NextPath      string
 	NextTitle     string
 	Tags          []string
-<<<<<<< HEAD
-||||||| 5803fd1
-=======
 	SourcePath    string
->>>>>>> personal
 }

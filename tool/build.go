@@ -148,13 +148,6 @@ var BuildCmd = &cobra.Command{
 					if e.Name() == "index.html" || e.Name() == "styles.css" || e.Name() == "app.js" {
 						continue
 					}
-<<<<<<< HEAD
-||||||| 5803fd1
-					link := e.Name()
-					name := e.Name()
-					if e.IsDir() {
-						link += "/"
-=======
 					if e.IsDir() && e.Name() == "images" {
 						continue
 					}
@@ -166,7 +159,6 @@ var BuildCmd = &cobra.Command{
 							continue
 						}
 					}
->>>>>>> personal
 					var link string
 					if rel == "." {
 						link = "/" + e.Name()
@@ -381,11 +373,7 @@ func processNoteFile(notePath, outPath string) (template.HTML, []string, []Searc
 		NextPath:      nextPath,
 		NextTitle:     nextTitle,
 		Tags:          tags,
-<<<<<<< HEAD
-||||||| 5803fd1
-=======
 		SourcePath:    filepath.ToSlash(notePath),
->>>>>>> personal
 	})
 	if err != nil {
 		return "", nil, nil, err
@@ -524,7 +512,7 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 		fmt.Fprintf(&r.sb, `<div class="summary-block hidden">`)
 	} else if n.Name == "spoiler" {
 		fmt.Fprintf(&r.sb, `<span class="spoiler">`)
-		
+
 		preview := n.FindChild("preview")
 		if preview != nil {
 			fmt.Fprintf(&r.sb, `<span class="spoiler-summary">`)
@@ -533,14 +521,14 @@ func (r *HTMLRenderer) VisitBlock(n *BlockNode) {
 			}
 			fmt.Fprintf(&r.sb, `</span>`)
 		}
-		
+
 		content := n.FindChild("content")
 		if content != nil {
 			fmt.Fprintf(&r.sb, `<span class="spoiler-content">`)
 			r.renderParagraphWrappedChildren(content.Children)
 			fmt.Fprintf(&r.sb, `</span>`)
 		}
-		
+
 		var otherChildren []Node
 		for _, child := range n.Children {
 			if bn, ok := child.(*BlockNode); ok && (bn.Name == "preview" || bn.Name == "content") {
@@ -730,62 +718,6 @@ func collectSearchEntries(node Node, fileSlug string, lessonLink string, course 
 
 	var entries []SearchEntry
 
-<<<<<<< HEAD
-	isSearchable := block.Name == "theorem" || block.Name == "lemma" || block.Name == "definition" || block.Name == "proposition" || block.Name == "corollary"
-	if isSearchable {
-		// Assign ID
-		uid := block.Attr("id")
-		if uid == "" {
-			uid = block.Attr("uid")
-		}
-		// If not found, look for first box with a uid
-		if uid == "" {
-			for _, child := range block.Children {
-				if cb, ok := child.(*BlockNode); ok && cb.Name == "box" {
-					if buid := cb.Attr("uid"); buid != "" {
-						uid = strings.TrimSuffix(buid, "-box")
-						break
-					}
-				}
-			}
-		}
-		// Fallback to sequential ID
-		if uid == "" {
-			uid = fmt.Sprintf("%s-%d", block.Name, *counter)
-			*counter++
-		}
-		block.Attributes["id"] = uid
-
-		// Extract plain text for searching
-		extractor := &TextExtractor{}
-		block.Accept(extractor)
-		contentText := strings.TrimSpace(extractor.String())
-
-		// Render HTML for display
-		renderer := &HTMLRenderer{absDir: absDir}
-		block.Accept(renderer)
-		contentHTML := renderer.String()
-
-		entries = append(entries, SearchEntry{
-			ID:          uid,
-			Type:        block.Name,
-			LessonTitle: fileSlug,
-			LessonLink:  lessonLink + "#" + uid,
-			Course:      course,
-			Date:        date,
-			ContentText: contentText,
-			ContentHTML: contentHTML,
-		})
-	}
-
-	for _, child := range block.Children {
-		childEntries := collectSearchEntries(child, fileSlug, lessonLink, course, date, absDir, counter)
-		entries = append(entries, childEntries...)
-	}
-
-	return entries
-||||||| 5803fd1
-=======
 	isSearchable := block.Name == "theorem" || block.Name == "lemma" || block.Name == "definition" || block.Name == "proposition" || block.Name == "corollary" || block.Name == "fact"
 	if isSearchable {
 		// Assign ID
@@ -942,5 +874,4 @@ func (r *HTMLRenderer) renderParagraphWrappedChildren(children []Node) {
 		}
 	}
 	closeP()
->>>>>>> personal
 }
