@@ -6,6 +6,8 @@ Your role as an agent is to systematically convert all unmapped OCR images into 
 
 Never use the browser subagent tool. Never use the browser subagent tool.
 
+IMPORTANT: Always prefer using the language present in the source note photos for all note content, including rewordings, summaries, titles, and mathematical terminology. Do not translate the notes to English if the source is in another language.
+
 ## Available Tools
 
 We use a CLI in `main.go` built with Cobra (`./converter` once built):
@@ -29,7 +31,7 @@ We use a CLI in `main.go` built with Cobra (`./converter` once built):
 
 6. **Rewording**: It is mandatory to provide a formal, professional mathematical rewrite of the transcribed text. Use `<reword>...</reword>` blocks to contain this formal version. These blocks can be used as children of semantic wrappers (like `<theorem>`) or placed freely at the top-level for more general commentary. The renderer styles these with a textbook-like appearance (serif font, gray border).
    - **Fidelity**: The `<reword>` block MUST follow the original handwritten text closely. Do not remove any information present in the source `<box>` tags. The goal is to make the content readable and grammatically correct by adding minimal connectives and formal formatting, while preserving 100% of the mathematical and logical substance.
-   - Within `<reword>` blocks that correspond to semantic wrappers (e.g. inside `<theorem>`, `<lemma>`), start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Teorema (Nome).</strong>` or `<strong>Definizione.</strong>`). Always use the Italian terminology to match the source notes: **Teorema**, **Definizione**, **Proposizione**, **Lemma**, **Corollario**, **Esercizio**, **Dimostrazione**, **Esempio**, **Nota** / **Osservazione**.
+   - Within `<reword>` blocks that correspond to semantic wrappers (e.g. inside `<theorem>`, `<lemma>`), start with the appropriate prefix (using `<strong>`) followed by the name in parentheses if applicable (e.g., `<strong>Theorem (Name).</strong>` or `<strong>Teorema (Nome).</strong>`). Always prefer using the terminology corresponding to the language present in the source note photos (for example, **Theorem**, **Definition**, **Proposition**, **Lemma**, **Corollary**, **Exercise**, **Proof**, **Example**, **Note** / **Remark** in English, or **Teorema**, **Definizione**, **Proposizione**, **Lemma**, **Corollario**, **Esercizio**, **Dimostrazione**, **Esempio**, **Nota** / **Osservazione** in Italian).
    - **No Strong Labels for Normal Paragraphs / Previews**: Do NOT start normal paragraphs (top-level rewords) or `<preview>` blocks with strong labels (e.g. `<strong>Definizione di f.</strong>` or `<strong>Note (Embedding).</strong>`). Keep a more classical, continuous text flow instead.
 
 7. **Lists**: Use `<itemize>` or `<enumerate>` for bulleted or numbered lists, placing each entry inside an `<item>...</item>` tag.
